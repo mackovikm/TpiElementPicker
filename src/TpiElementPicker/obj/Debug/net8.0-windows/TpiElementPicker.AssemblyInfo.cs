@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("TpiElementPicker")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+cabd2703198b2f62770956e64c4405b5d94794db")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+564a57a42e71f7a906089ab6769ea0c8580a429e")]
 [assembly: System.Reflection.AssemblyProductAttribute("TpiElementPicker")]
 [assembly: System.Reflection.AssemblyTitleAttribute("TpiElementPicker")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
