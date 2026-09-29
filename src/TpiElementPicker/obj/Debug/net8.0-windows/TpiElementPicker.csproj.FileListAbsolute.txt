@@ -30,3 +30,4 @@ D:\CDT\TPI\TpiElementPicker\src\TpiElementPicker\obj\Debug\net8.0-windows\refint
 D:\CDT\TPI\TpiElementPicker\src\TpiElementPicker\obj\Debug\net8.0-windows\TpiElementPicker.pdb
 D:\CDT\TPI\TpiElementPicker\src\TpiElementPicker\obj\Debug\net8.0-windows\TpiElementPicker.genruntimeconfig.cache
 D:\CDT\TPI\TpiElementPicker\src\TpiElementPicker\obj\Debug\net8.0-windows\ref\TpiElementPicker.dll
+D:\CDT\TPI\TpiElementPicker\src\TpiElementPicker\obj\Debug\net8.0-windows\TpiElementPicker.sourcelink.json

@@ -1,16 +1,7 @@
 {
   "Version": 1,
   "WorkspaceRootPath": "D:\\CDT\\TPI\\TpiElementPicker\\",
-  "Documents": [
-    {
-      "AbsoluteMoniker": "D:0:0:{4A2B6C11-9E31-4D4E-9A3C-1B7C2E5D0A01}|src\\TpiGto\\TpiGto.csproj|d:\\cdt\\tpi\\tpielementpicker\\src\\tpigto\\tpigto.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
-      "RelativeMoniker": "D:0:0:{4A2B6C11-9E31-4D4E-9A3C-1B7C2E5D0A01}|src\\TpiGto\\TpiGto.csproj|solutionrelative:src\\tpigto\\tpigto.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{4A2B6C11-9E31-4D4E-9A3C-1B7C2E5D0A02}|src\\TpiElementPicker\\TpiElementPicker.csproj|d:\\cdt\\tpi\\tpielementpicker\\src\\tpielementpicker\\tpielementpicker.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
-      "RelativeMoniker": "D:0:0:{4A2B6C11-9E31-4D4E-9A3C-1B7C2E5D0A02}|src\\TpiElementPicker\\TpiElementPicker.csproj|solutionrelative:src\\tpielementpicker\\tpielementpicker.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
-    }
-  ],
+  "Documents": [],
   "DocumentGroupContainers": [
     {
       "Orientation": 0,
@@ -18,7 +9,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 16,
+          "SelectedChildIndex": -1,
           "Children": [
             {
               "$type": "Bookmark",
@@ -79,32 +70,6 @@
             {
               "$type": "Bookmark",
               "Name": "ST:0:0:{a80febb4-e7e0-4147-b476-21aaf2453969}"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "TpiElementPicker",
-              "DocumentMoniker": "D:\\CDT\\TPI\\TpiElementPicker\\src\\TpiElementPicker\\TpiElementPicker.csproj",
-              "RelativeDocumentMoniker": "src\\TpiElementPicker\\TpiElementPicker.csproj",
-              "ToolTip": "D:\\CDT\\TPI\\TpiElementPicker\\src\\TpiElementPicker\\TpiElementPicker.csproj",
-              "RelativeToolTip": "src\\TpiElementPicker\\TpiElementPicker.csproj",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
-              "WhenOpened": "2026-09-29T19:29:10.543Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "TpiGto",
-              "DocumentMoniker": "D:\\CDT\\TPI\\TpiElementPicker\\src\\TpiGto\\TpiGto.csproj",
-              "RelativeDocumentMoniker": "src\\TpiGto\\TpiGto.csproj",
-              "ToolTip": "D:\\CDT\\TPI\\TpiElementPicker\\src\\TpiGto\\TpiGto.csproj",
-              "RelativeToolTip": "src\\TpiGto\\TpiGto.csproj",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
-              "WhenOpened": "2026-09-29T19:29:04.209Z",
-              "EditorCaption": ""
             }
           ]
         },

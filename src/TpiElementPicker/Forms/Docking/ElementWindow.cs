@@ -14,6 +14,7 @@ public sealed class ElementWindow : ToolWindowBase
     private readonly TextBox _path = new();
     private readonly TextBox _suffix = new();
     private readonly ComboBox _candidates = new() { DropDownStyle = ComboBoxStyle.DropDownList };
+    private readonly ComboBox _createTyp = new() { DropDownStyle = ComboBoxStyle.DropDownList };
     private readonly ListView _attributes = new()
     {
         Dock = DockStyle.Fill,
@@ -40,18 +41,21 @@ public sealed class ElementWindow : ToolWindowBase
         {
             Dock = DockStyle.Top,
             ColumnCount = 2,
-            RowCount = 3,
-            Height = 90,
+            RowCount = 4,
+            Height = 119,
             Padding = new Padding(6, 6, 6, 0)
         };
         top.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 150F));
         top.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
-        for (var i = 0; i < 3; i++)
+        for (var i = 0; i < 4; i++)
             top.RowStyles.Add(new RowStyle(SizeType.Absolute, 29F));
 
         _path.Dock = DockStyle.Fill;
         _suffix.Dock = DockStyle.Fill;
         _candidates.Dock = DockStyle.Fill;
+        _createTyp.Dock = DockStyle.Fill;
+        _createTyp.Items.AddRange(new object[] { "(nevytvářet)", "layout", "popup" });
+        _createTyp.SelectedIndex = 0;
 
         top.Controls.Add(new Label { Text = "in_ref_element_path:", AutoSize = true, Anchor = AnchorStyles.Left }, 0, 0);
         top.Controls.Add(_path, 1, 0);
@@ -59,6 +63,8 @@ public sealed class ElementWindow : ToolWindowBase
         top.Controls.Add(_suffix, 1, 1);
         top.Controls.Add(new Label { Text = "Návrhy:", AutoSize = true, Anchor = AnchorStyles.Left }, 0, 2);
         top.Controls.Add(_candidates, 1, 2);
+        top.Controls.Add(new Label { Text = "Vytvořit nový element:", AutoSize = true, Anchor = AnchorStyles.Left }, 0, 3);
+        top.Controls.Add(_createTyp, 1, 3);
 
         _attributes.Columns.Add("Atribut", 170);
         _attributes.Columns.Add("Hodnota", 420);
@@ -100,6 +106,14 @@ public sealed class ElementWindow : ToolWindowBase
             if (_suppress) return;
             if (_candidates.SelectedItem is ElementPathCandidate candidate)
                 _path.Text = candidate.Value;
+        };
+
+        _createTyp.SelectedIndexChanged += (_, _) =>
+        {
+            if (_suppress) return;
+            Workspace.CurrentCreateElementTyp = _createTyp.SelectedIndex <= 0
+                ? null
+                : Convert.ToString(_createTyp.SelectedItem);
         };
 
         _attributes.DoubleClick += (_, _) => UseSelectedAttributeValue();
@@ -165,9 +179,11 @@ public sealed class ElementWindow : ToolWindowBase
             }
 
             _suffix.Text = string.Empty;
+            _createTyp.SelectedIndex = 0;
 
             Workspace.CurrentElementPath = _path.Text;
             Workspace.CurrentSuffix = string.Empty;
+            Workspace.CurrentCreateElementTyp = null;
             Workspace.RememberDomIndex(_path.Text, node.Index);
         }
         finally

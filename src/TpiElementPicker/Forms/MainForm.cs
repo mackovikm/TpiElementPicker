@@ -41,7 +41,7 @@ public sealed class MainForm : Form
     {
         DropDownStyle = ComboBoxStyle.DropDownList,
         Width = 120,
-        ToolTipText = "Typ obrazovky – na seznamu se tabulka jmenuje object_list"
+        ToolTipText = "Typ obrazovky – na seznamu se tabulka jmenuje ObjectList"
     };
     private readonly ToolStripButton _pickButton = new("Vybrat prvek (F2)")
     {
@@ -150,7 +150,8 @@ public sealed class MainForm : Form
 
         var generate = new ToolStripMenuItem("&Generovat");
         generate.DropDownItems.Add("&Statické GTO", null, (_, _) => _scriptWindow.Generate(GtoMode.Static));
-        generate.DropDownItems.Add("&Dynamické GTO", null, (_, _) => _scriptWindow.Generate(GtoMode.Dynamic));
+        generate.DropDownItems.Add("&Runtime GTO", null, (_, _) => _scriptWindow.Generate(GtoMode.Dynamic));
+        generate.DropDownItems.Add("Runtime GTO nad &daty", null, (_, _) => _scriptWindow.Generate(GtoMode.DynamicData));
         var all = new ToolStripMenuItem("&Vše", null, (_, _) => _scriptWindow.Generate(null))
         {
             ShortcutKeys = Keys.Control | Keys.G

@@ -15,8 +15,18 @@ public sealed class MappedElement
     /// <summary>Event u typu CONNECTION (blur, click, right_click…).</summary>
     public string? EventCode { get; set; }
 
-    /// <summary>Sloupec u typů TABLE_COLUMN / COMBOBOX_COLUMN.</summary>
+    /// <summary>
+    /// Podřízený prvek doplněný do cesty – sloupec tabulky, položka menu nebo záložka
+    /// (M_PF_DT_TABLE_COLUMN.NAME / M_PF_DT_MENU_ITEM.NAME / M_PF_DT_TAB_ITEM.NAME).
+    /// </summary>
     public string? Column { get; set; }
+
+    /// <summary>
+    /// Vyplněno, pokud se tímto GTO má nový element teprve vytvořit – hodnota
+    /// parametru in_element_typ (<c>layout</c> nebo <c>popup</c>). Nový element se
+    /// pak musí zařadit pod existující element vlastností M_Pf_Element.M_Pf_Element_Name.
+    /// </summary>
+    public string? CreateElementTyp { get; set; }
 
     /// <summary>Popisek pro orientaci v seznamu (text prvku, label).</summary>
     public string? Label { get; set; }

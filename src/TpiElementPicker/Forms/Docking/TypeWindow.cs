@@ -27,7 +27,13 @@ public sealed class TypeWindow : ToolWindowBase
     };
 
     private const string ModeStatic = "Statické";
-    private const string ModeDynamic = "Dynamické";
+    private const string ModeDynamic = "Runtime";
+    private const string ModeDynamicData = "Runtime (data)";
+
+    private const string OverloadDefault = "DEFAULT";
+    private const string OverloadRole = "ROLE";
+    private const string OverloadUser = "USER";
+    private const string OverloadSecurity = "SECURITY";
 
     private bool _suppress;
 
@@ -117,10 +123,27 @@ public sealed class TypeWindow : ToolWindowBase
 
         var mode = new DataGridViewComboBoxColumn
         {
-            HeaderText = "Režim", Name = "colMode", FillWeight = 45F
+            HeaderText = "Režim", Name = "colMode", FillWeight = 50F,
+            ToolTipText = "Statické = iniciální GTO skriptem, Runtime = @GATTRIB_OVERLOAD v MWF, " +
+                          "Runtime (data) = @GATTRIB_OVERLOAD_DATA (až po namapování dat)"
         };
-        mode.Items.AddRange(ModeStatic, ModeDynamic);
+        mode.Items.AddRange(ModeStatic, ModeDynamic, ModeDynamicData);
         _grid.Columns.Add(mode);
+
+        var overload = new DataGridViewComboBoxColumn
+        {
+            HeaderText = "Typ overloadu", Name = "colOverload", FillWeight = 50F,
+            ToolTipText = "DEFAULT = vždy, ROLE = podle role (in_ref_role), USER = podle uživatele " +
+                          "(in_ref_login), SECURITY = i při každé iteraci"
+        };
+        overload.Items.AddRange(OverloadDefault, OverloadRole, OverloadUser, OverloadSecurity);
+        _grid.Columns.Add(overload);
+
+        _grid.Columns.Add(new DataGridViewTextBoxColumn
+        {
+            HeaderText = "Login / role", Name = "colRef", FillWeight = 45F,
+            ToolTipText = "ID uživatele (tpi_uzivatel.id) pro USER, nebo ID role (m_role.id) pro ROLE"
+        });
 
         _grid.Columns.Add(new DataGridViewCheckBoxColumn
         {
@@ -192,8 +215,8 @@ public sealed class TypeWindow : ToolWindowBase
         var info = new StringBuilder(type.Description);
         if (!string.IsNullOrWhiteSpace(type.PathHint))
             info.Append("   |   element_path: ").Append(type.PathHint);
-        if (type.RequiresColumn)
-            info.Append("   |   nutný sloupec (fyzický název v DB)");
+        if (type.RequiresSubElement)
+            info.Append("   |   nutný ").Append(type.SubElementLabel);
         if (!string.Equals(type.Origin, "built-in", StringComparison.OrdinalIgnoreCase))
             info.Append("   |   zdroj: ").Append(type.Origin);
         _info.Text = info.ToString();
@@ -265,7 +288,9 @@ public sealed class TypeWindow : ToolWindowBase
                 assignment?.Enabled ?? false,
                 property.Name,
                 assignment?.Value ?? string.Empty,
-                assignment is null || assignment.Mode == GtoMode.Static ? ModeStatic : ModeDynamic,
+                ModeName(assignment?.Mode ?? GtoMode.Static),
+                OverloadName(assignment?.OverloadType ?? GtoOverloadType.Default),
+                assignment?.RefLogin ?? assignment?.RefRole ?? string.Empty,
                 assignment?.Cancelled == 1,
                 property.Category,
                 property.Description);
@@ -273,8 +298,21 @@ public sealed class TypeWindow : ToolWindowBase
             var row = _grid.Rows[index];
             row.Tag = property;
 
+            var hint = new StringBuilder();
             if (!string.IsNullOrWhiteSpace(property.Example))
-                row.Cells[2].ToolTipText = "Příklad: " + property.Example;
+                hint.Append("Příklad: ").Append(property.Example);
+            if (property.GmsgId is { } id)
+            {
+                if (hint.Length > 0) hint.Append("   |   ");
+                hint.Append("m_cis_gattrib_overload.id = ").Append(id);
+            }
+            if (property.Source == GtoPropertySource.CisGto)
+            {
+                if (hint.Length > 0) hint.Append("   |   ");
+                hint.Append("jen v cis_gto.docx, ne v seznamu GMSG");
+            }
+            if (hint.Length > 0)
+                row.Cells[2].ToolTipText = hint.ToString();
         }
     }
 
@@ -318,9 +356,25 @@ public sealed class TypeWindow : ToolWindowBase
         {
             row.Cells[0].Value = false;
             row.Cells[2].Value = string.Empty;
-            row.Cells[4].Value = false;
+            row.Cells[5].Value = string.Empty;
+            row.Cells[6].Value = false;
         }
     }
+
+    private static string ModeName(GtoMode mode) => mode switch
+    {
+        GtoMode.Dynamic => ModeDynamic,
+        GtoMode.DynamicData => ModeDynamicData,
+        _ => ModeStatic
+    };
+
+    private static string OverloadName(GtoOverloadType type) => type switch
+    {
+        GtoOverloadType.Role => OverloadRole,
+        GtoOverloadType.User => OverloadUser,
+        GtoOverloadType.Security => OverloadSecurity,
+        _ => OverloadDefault
+    };
 
     /// <summary>Uloží aktuální prvek do mapování (volá se i z hlavního okna přes F5).</summary>
     public void Apply()
@@ -349,16 +403,34 @@ public sealed class TypeWindow : ToolWindowBase
 
             var enabled = row.Cells[0].Value is true;
             var value = Convert.ToString(row.Cells[2].Value) ?? string.Empty;
-            var cancelled = row.Cells[4].Value is true;
+            var cancelled = row.Cells[6].Value is true;
 
             if (!enabled && string.IsNullOrWhiteSpace(value) && !cancelled)
                 continue;
+
+            var overloadType = Convert.ToString(row.Cells[4].Value) switch
+            {
+                OverloadRole => GtoOverloadType.Role,
+                OverloadUser => GtoOverloadType.User,
+                OverloadSecurity => GtoOverloadType.Security,
+                _ => GtoOverloadType.Default
+            };
+
+            var reference = (Convert.ToString(row.Cells[5].Value) ?? string.Empty).Trim();
 
             assignments.Add(new GtoAssignment
             {
                 PropertyName = property.Name,
                 Value = value,
-                Mode = Convert.ToString(row.Cells[3].Value) == ModeDynamic ? GtoMode.Dynamic : GtoMode.Static,
+                Mode = Convert.ToString(row.Cells[3].Value) switch
+                {
+                    ModeDynamic => GtoMode.Dynamic,
+                    ModeDynamicData => GtoMode.DynamicData,
+                    _ => GtoMode.Static
+                },
+                OverloadType = overloadType,
+                RefRole = overloadType == GtoOverloadType.Role && reference.Length > 0 ? reference : null,
+                RefLogin = overloadType == GtoOverloadType.User && reference.Length > 0 ? reference : null,
                 Cancelled = cancelled ? 1 : 0,
                 Enabled = enabled || cancelled
             });

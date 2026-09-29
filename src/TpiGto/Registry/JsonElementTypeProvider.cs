@@ -55,11 +55,17 @@ public sealed class JsonElementTypeProvider : ITpiElementTypeProvider
         public string? Description { get; set; }
         public string? PathHint { get; set; }
 
-        /// <summary>Např. object_list pro tabulku na obrazovce typu seznam.</summary>
+        /// <summary>Např. ObjectList pro tabulku na obrazovce typu seznam.</summary>
         public string? ListScreenElementName { get; set; }
 
-        /// <summary>Vyžaduje sloupec v element_path.</summary>
-        public bool RequiresColumn { get; set; }
+        /// <summary>Vyžaduje v element_path podřízený prvek (sloupec, položku menu, záložku).</summary>
+        public bool RequiresSubElement { get; set; }
+
+        /// <summary>Jak se podřízený prvek jmenuje (nápověda v UI).</summary>
+        public string? SubElementLabel { get; set; }
+
+        /// <summary>Přidat k typu vlastnosti M_Pf_Widget.*.</summary>
+        public bool IncludesWidgetProperties { get; set; }
 
         public bool AppendsEvent { get; set; }
         public bool IncludesCommonProperties { get; set; } = true;
@@ -108,7 +114,11 @@ public sealed class JsonDefinedElementType : TpiElementType
     public override string Description => _json.Description ?? string.Empty;
     public override string? PathHint => _json.PathHint;
     public override string? ListScreenElementName => _json.ListScreenElementName;
-    public override bool RequiresColumn => _json.RequiresColumn;
+    public override bool RequiresSubElement => _json.RequiresSubElement;
+    public override string SubElementLabel => string.IsNullOrWhiteSpace(_json.SubElementLabel)
+        ? base.SubElementLabel
+        : _json.SubElementLabel!;
+    public override bool IncludesWidgetProperties => _json.IncludesWidgetProperties;
     public override bool AppendsEvent => _json.AppendsEvent;
     public override bool IncludesCommonProperties => _json.IncludesCommonProperties;
     public override int SortOrder => _json.SortOrder;

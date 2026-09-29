@@ -13,9 +13,11 @@ public sealed class ComboboxColumnElementType : TpiElementType
 
     public override int SortOrder => 90;
 
-    public override string? PathHint => "<element comboboxu>.<FYZICKÝ_NÁZEV_SLOUPCE>";
+    public override string? PathHint => "<element comboboxu>.<SLOUPEC>";
 
-    public override bool RequiresColumn => true;
+    public override bool RequiresSubElement => true;
+
+    public override string SubElementLabel => "sloupec comboboxu";
 
     public override ElementMatchRule MatchRule => new()
     {
@@ -26,22 +28,38 @@ public sealed class ComboboxColumnElementType : TpiElementType
     {
         yield return new GtoPropertyDefinition(
             "M_Pf_Dt_Combobox_Column.Virtual_Column_Name",
-            "Název sloupců zobrazených v comboboxu",
-            GtoValueKind.Text);
+            "Název sloupce zobrazený v comboboxu",
+            GtoValueKind.Text,
+            gmsgId: 13300825);
+
+        yield return new GtoPropertyDefinition(
+            "M_Pf_Dt_Combobox_Column.Name",
+            "Technický název sloupce",
+            GtoValueKind.Text,
+            gmsgId: 13400825);
 
         yield return new GtoPropertyDefinition(
             "M_Pf_Dt_Combobox_Column.Column_Indx",
-            "Pořadí zobrazení sloupců v comboboxu",
-            GtoValueKind.Number);
+            "Pořadí sloupce",
+            GtoValueKind.Number,
+            gmsgId: 13200825);
 
         yield return new GtoPropertyDefinition(
             "M_Pf_Dt_Combobox_Column.Show_Column",
-            "Zobrazení sloupce v comboboxu 0/1",
-            GtoValueKind.Bool01, example: "1");
+            "Zobrazení sloupce 0/1",
+            GtoValueKind.Bool01,
+            example: "1", gmsgId: 13500825);
+
+        yield return new GtoPropertyDefinition(
+            "M_Pf_Dt_Combobox_Column.M_Cis_Pf_Format",
+            "Formát zobrazení sloupce",
+            GtoValueKind.Text,
+            gmsgId: 13600825);
 
         yield return new GtoPropertyDefinition(
             "M_Pf_Dt_Combobox_Column.Sortorder",
-            "Seřazení sloupce v elementu typu combobox",
-            GtoValueKind.Number);
+            "Seřazení sloupce",
+            GtoValueKind.Number,
+            source: GtoPropertySource.CisGto);
     }
 }

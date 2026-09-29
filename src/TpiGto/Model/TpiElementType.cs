@@ -27,16 +27,25 @@ public abstract class TpiElementType
 
     /// <summary>
     /// Název elementu, který tento typ má na obrazovce typu seznam – např. tabulka
-    /// seznamu se ve frameworku vždy jmenuje <c>object_list</c>. Aplikace ho použije
+    /// seznamu se ve frameworku vždy jmenuje <c>ObjectList</c>. Aplikace ho použije
     /// jako návrh in_ref_element_path. Null = odvozuje se z prvku stránky.
     /// </summary>
     public virtual string? ListScreenElementName => null;
 
     /// <summary>
-    /// True, pokud element_path musí obsahovat i sloupec (fyzický název sloupce
-    /// v databázi) – bez něj by se změna vztahovala na celou tabulku.
+    /// True, pokud element_path musí obsahovat i podřízený prvek – sloupec tabulky,
+    /// položku menu nebo záložku. Bez něj by se změna vztahovala na celý element.
     /// </summary>
-    public virtual bool RequiresColumn => false;
+    public virtual bool RequiresSubElement => false;
+
+    /// <summary>Jak se podřízený prvek jmenuje (pro nápovědu v UI).</summary>
+    public virtual string SubElementLabel => "sloupec";
+
+    /// <summary>
+    /// True, pokud má element i widget (velikost, pozice, enabled) – registr pak
+    /// k typu přidá vlastnosti M_Pf_Widget.*.
+    /// </summary>
+    public virtual bool IncludesWidgetProperties => false;
 
     /// <summary>
     /// True, pokud se za element_path doplňuje event (typ CONNECTION),

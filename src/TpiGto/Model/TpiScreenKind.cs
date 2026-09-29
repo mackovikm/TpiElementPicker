@@ -11,8 +11,8 @@ public enum TpiScreenKind
 
     /// <summary>
     /// Seznam – obraz celé databázové tabulky. Element celé tabulky se ve frameworku
-    /// jmenuje vždy <c>object_list</c>; sloupec se adresuje jako
-    /// <c>object_list.&lt;FYZICKÝ_NÁZEV_SLOUPCE&gt;</c>.
+    /// jmenuje vždy <c>ObjectList</c>; sloupec se adresuje jako
+    /// <c>ObjectList.&lt;FYZICKÝ_NÁZEV_SLOUPCE&gt;</c>.
     /// </summary>
     List = 1,
 

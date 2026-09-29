@@ -21,13 +21,27 @@ public sealed class TableValueElementType : TpiElementType
     protected override IEnumerable<GtoPropertyDefinition> DefineProperties()
     {
         yield return new GtoPropertyDefinition(
+            "M_Pf_Dt_Table_Value.Value",
+            "Hodnota buňky",
+            GtoValueKind.Text,
+            gmsgId: 1000825);
+
+        yield return new GtoPropertyDefinition(
+            "M_Pf_Dt_Table_Value.Special_Flag",
+            "Speciální příznak buňky",
+            GtoValueKind.Text,
+            gmsgId: 900825);
+
+        yield return new GtoPropertyDefinition(
             "M_Pf_Dt_Table_Value.Readonly",
-            "Readonly 0/1 pro tabulku",
-            GtoValueKind.Bool01, example: "1");
+            "Readonly 0/1",
+            GtoValueKind.Bool01,
+            example: "1", source: GtoPropertySource.CisGto);
 
         yield return new GtoPropertyDefinition(
             "M_Pf_Df_Table_Value.Html_Style",
-            "CSS styly pro tabulku. Pozor: v cis_gto.docx je uveden prefix M_Pf_Df_, nikoli M_Pf_Dt_.",
-            GtoValueKind.Css, example: "background-color: #0062cc;border-color: #005cbf;");
+            "CSS styly buňky (v cis_gto.docx je prefix M_Pf_Df_)",
+            GtoValueKind.Css,
+            example: "background-color: #0062cc;", source: GtoPropertySource.CisGto);
     }
 }

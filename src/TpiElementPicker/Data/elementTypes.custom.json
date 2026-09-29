@@ -5,25 +5,29 @@
   //
   // valueKind: Text | Bool01 | Number | Css | Color | MwfName | ElementName | Sql
   //
+  // Vestavěné typy vycházejí ze seznamu GMSG vlastností v Gattrib_Overload.docx
+  // (m_cis_gattrib_overload) doplněného o cis_gto.docx a katalog maker.
   // Trvalé rozšíření je lepší přidat jako třídu do knihovny TpiGto (složka Types) –
   // viz README. Tenhle soubor je na rychlé doplnění za běhu.
 
   "version": 1,
   "types": [
     {
-      "code": "TREE",
-      "name": "Strom (Tree)",
-      "description": "Stromový element – v makrech je uveden mezi prvky s eventem rightClick.",
-      "sortOrder": 75,
+      "code": "IMAGE_AREA",
+      "name": "Oblast interaktivního obrázku",
+      "description": "Klikací oblast interaktivního obrázku – doplněno jako ukázka vlastního typu.",
+      "sortOrder": 170,
       "includesCommonProperties": true,
+      "includesWidgetProperties": true,
+      "requiresSubElement": false,
       "match": {
-        "roles": [ "tree" ],
-        "classHints": [ "tree", "treeview" ]
+        "tags": [ "area", "svg", "image" ],
+        "classHints": [ "image-area", "hotspot" ]
       },
       "properties": [
         {
           "name": "M_Pf_Element.Visible",
-          "description": "Zobrazení elementu 0/1",
+          "description": "Zobrazení oblasti 0/1",
           "valueKind": "Bool01",
           "example": "1"
         }

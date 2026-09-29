@@ -21,6 +21,7 @@ TpiElementPicker.sln
     │   ├── Types              … jeden soubor = jeden typ prvku  ← sem se přidávají nové typy
     │   ├── Registry           … skládání číselníku ze zdrojů (kód + JSON)
     │   ├── Matching           … návrh typu podle kliknutého prvku
+    │   ├── Naming             … konvence názvů (tabulka = vše za prefixem LIST)
     │   ├── Paths              … odvození in_ref_element_path
     │   ├── Mapping            … model mapování + JSON export
     │   └── Scripting          … generátor statického a dynamického GTO
@@ -88,9 +89,10 @@ Generátor a kontroly z něj přímo vycházejí:
 * **Dvě obrazovky, dvě skladby cesty.** *Seznam* je obraz celé databázové tabulky,
   *detail* (formulář) obraz jednoho řádku. Typ obrazovky se přepíná v panelu nástrojů
   (`Obrazovka: ? / Seznam / Detail`) a ukládá se do mapování.
-* **Na seznamu se tabulka jmenuje vždy `object_list`.** Aplikace ho u typů TABLE
+* **Na seznamu se tabulka jmenuje vždy `ObjectList`.** Aplikace ho u typů TABLE
   a TABLE_COLUMN rovnou předvyplní; pokud je zadáno něco jiného, kontroly to označí.
-* **Změna celé tabulky** (šířka, filtr, řazení) → cesta `object_list`.
+  V detailu se child tabulky jmenují `child_<TABULKA>`.
+* **Změna celé tabulky** (šířka, filtr, řazení) → cesta `ObjectList`.
   **Změna sloupce** (skrytí, popisek v hlavičce, pořadí) → cesta musí obsahovat
   i sloupec, a to jeho **fyzický název v databázi**, ne popisek z hlavičky.
   Typy s `RequiresColumn` na chybějící sloupec upozorní chybou.
@@ -122,11 +124,39 @@ Generátor a kontroly z něj přímo vycházejí:
 * **Kde zkoušet:** nejdřív na devu nad objednávkou / fakturou (menu Test), teprve pak
   nad číselníky – neexistující gattriby tam umí nadělat nepořádek.
 
+## Co přidala dokumentace Gattrib_Overload.docx a katalog maker
+
+* **Číselník vlastností je teď kompletní** – 174 vlastností v typech plus společné
+  `M_Pf_Element.*` a `M_Pf_Widget.*`, u každé je ID z `m_cis_gattrib_overload`
+  a informace, zda je doložená seznamem GMSG, jen v `cis_gto.docx`, nebo v katalogu maker.
+* **Typy overloadu.** Iniciální GTO může být `DEFAULT_OVERLOAD`, `ROLE_OVERLOAD`
+  (podle role, vyžaduje `in_ref_role` = m_role.id), `USER_OVERLOAD` (podle uživatele,
+  `in_ref_login` = tpi_uzivatel.id) nebo `SECURITY_OVERLOAD` (běží i při každé iteraci,
+  takže přebije i runtime overload). Nastavuje se u každé vlastnosti v mřížce.
+* **Runtime GTO nad daty** – `@GATTRIB_OVERLOAD_DATA` se provede až po namapování
+  business dat do GMSG, takže hodnota může na datech záviset (obarvit pole podle obsahu).
+  V mřížce je to třetí režim vedle statického a runtime.
+* **Vytvoření nového elementu.** Overloadem lze založit nový element typu `layout`
+  nebo `popup` (parametr `in_element_typ`); pak je nutné ho zařadit pod existující
+  element vlastností `M_Pf_Element.M_Pf_Element_Name`. Nastavuje se v okně *Prvek*
+  a kontroly hlídají obojí.
+* **Skladba cesty** je potvrzená: název elementu `M_PF_ELEMENT.ELEMENT_NAME`, k tomu
+  u sloupce `M_PF_DT_TABLE_COLUMN.NAME`, u položky menu `M_PF_DT_MENU_ITEM.NAME`,
+  u záložky `M_PF_DT_TAB_ITEM.NAME` (např. `RelTabs.POLOZKY_FA`) a u eventu jeho typ.
+  Typy, které podřízený prvek vyžadují, na jeho chybějící vyplnění upozorní chybou.
+* **Vstupní body PageFlow** (`M_Pf.Mwf_Name_Init`, `M_Pf.M_Mwf_Name_Reinit`,
+  `M_Pf.Mwf_Name_Leave`) se zadávají na element `Window` – jsou v typu WINDOW.
+  Init MWF nelze konfigurovat v runtime, což kontroly hlídají.
+* **Eventy** mají kromě `M_Pf_Connection.M_Wf_Name` i `M_Mwf_Name_Before`
+  a `M_Mwf_Name_After`.
+* **Nové typy prvků:** POPUP, TREE, TREE_NODE, LIST, LIST_ITEM, MAP, COMBOBOX_VALUE,
+  TABLE_SELECTED_ROW.
+
 ## in_ref_element_path
 
 Ve frameworku TPI je element_path **název elementu**, ne CSS selektor —
 např. `ContainerL_PTS_VRSTVA_DAT_FILTR_PTS_CIS_TYP_DAT_KOD_Field`, `child_PZSV_KOL_LOZE`,
-`MainMenu.PZSV_MWF_POSUN_TERMINU_ETAPY`, `object_list.DODAVATEL_ID`.
+`MainMenu.SAVE_AND_CLOSE`, `ObjectList.DODAVATEL_ID`, `child_POLOZKY_FA.CAS`.
 
 Podle školení nese název elementu v HTML atribut **`name`** — `id` je generované stránkou
 a pro GTO se nepoužívá. Odvozování proto začíná u `name`:

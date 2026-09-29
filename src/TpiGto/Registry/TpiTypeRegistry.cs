@@ -11,7 +11,8 @@ public sealed class TpiTypeRegistry
 {
     private readonly List<ITpiElementTypeProvider> _providers = new();
     private readonly Dictionary<string, TpiElementType> _types = new(StringComparer.OrdinalIgnoreCase);
-    private readonly List<GtoPropertyDefinition> _commonProperties = new(CommonGtoProperties.All);
+    private readonly List<GtoPropertyDefinition> _commonProperties = new(CommonGtoProperties.Element);
+    private readonly List<GtoPropertyDefinition> _widgetProperties = new(CommonGtoProperties.Widget);
 
     /// <summary>Registr jen s vestavěnými typy.</summary>
     public static TpiTypeRegistry CreateDefault()
@@ -37,6 +38,9 @@ public sealed class TpiTypeRegistry
 
     /// <summary>Společné vlastnosti M_Pf_Element.* přidávané k typům.</summary>
     public IReadOnlyList<GtoPropertyDefinition> CommonProperties => _commonProperties;
+
+    /// <summary>Vlastnosti widgetu M_Pf_Widget.* přidávané k vizuálním typům.</summary>
+    public IReadOnlyList<GtoPropertyDefinition> WidgetProperties => _widgetProperties;
 
     public void AddProvider(ITpiElementTypeProvider provider)
     {
@@ -74,13 +78,21 @@ public sealed class TpiTypeRegistry
         if (type is null) throw new ArgumentNullException(nameof(type));
 
         var result = new List<GtoPropertyDefinition>(type.Properties);
+
         if (type.IncludesCommonProperties)
-        {
-            foreach (var common in _commonProperties)
-                if (!result.Any(p => string.Equals(p.Name, common.Name, StringComparison.OrdinalIgnoreCase)))
-                    result.Add(common);
-        }
+            Append(result, _commonProperties);
+
+        if (type.IncludesWidgetProperties)
+            Append(result, _widgetProperties);
+
         return result;
+
+        static void Append(List<GtoPropertyDefinition> target, IEnumerable<GtoPropertyDefinition> source)
+        {
+            foreach (var property in source)
+                if (!target.Any(p => string.Equals(p.Name, property.Name, StringComparison.OrdinalIgnoreCase)))
+                    target.Add(property);
+        }
     }
 
     public IReadOnlyList<GtoPropertyDefinition> GetProperties(string typeCode)

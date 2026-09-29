@@ -32,7 +32,8 @@ public sealed class GtoScriptGenerator
         Options = options ?? new GtoScriptOptions();
 
         RegisterWriter(new StaticGtoScriptWriter());
-        RegisterWriter(new DynamicGtoScriptWriter());
+        RegisterWriter(new DynamicGtoScriptWriter(GtoMode.Dynamic));
+        RegisterWriter(new DynamicGtoScriptWriter(GtoMode.DynamicData));
     }
 
     public GtoScriptOptions Options { get; set; }
@@ -90,9 +91,20 @@ public sealed class GtoScriptGenerator
         {
             if (sb.Length > 0) sb.AppendLine();
             sb.AppendLine("-- ============================================================");
-            sb.AppendLine("-- DYNAMICKÉ GTO – vlož do theSql plain bloku MWF");
+            sb.AppendLine("-- RUNTIME GTO – vlož do theSql plain bloku MWF");
             sb.AppendLine("-- ============================================================");
             sb.AppendLine(dyn);
+        }
+
+        var dynData = Generate(document, GtoMode.DynamicData);
+        if (!string.IsNullOrWhiteSpace(dynData))
+        {
+            if (sb.Length > 0) sb.AppendLine();
+            sb.AppendLine("-- ============================================================");
+            sb.AppendLine("-- RUNTIME GTO NAD DATY – @GATTRIB_OVERLOAD_DATA");
+            sb.AppendLine("-- (provede se až po namapování business dat do GMSG)");
+            sb.AppendLine("-- ============================================================");
+            sb.AppendLine(dynData);
         }
 
         return sb.ToString();
@@ -146,7 +158,7 @@ public sealed class GtoScriptGenerator
         // Nápověda, kde hledat technické názvy sloupců.
         var tableName = TpiNaming.TableNameFromPageFlow(document.PfName);
         if (tableName is not null &&
-            document.Elements.Any(e => _registry.Find(e.TypeCode)?.RequiresColumn == true))
+            document.Elements.Any(e => _registry.Find(e.TypeCode)?.RequiresSubElement == true))
             issues.Add(new GtoValidationIssue(GtoValidationIssue.Info, "-",
                 $"Fyzický název tabulky odvozený z PageFlow: {tableName}. " +
                 "Technické názvy sloupců hledej v této tabulce – popisek v hlavičce jim odpovídat nemusí."));
@@ -171,13 +183,30 @@ public sealed class GtoScriptGenerator
                 issues.Add(new GtoValidationIssue(GtoValidationIssue.Warning, path,
                     "Typ CONNECTION obvykle vyžaduje event (blur, click, right_click…)."));
 
-            // Sloupec musí být součástí cesty, jinak změna zasáhne celou tabulku.
-            if (type.RequiresColumn && string.IsNullOrWhiteSpace(element.Column))
+            // Podřízený prvek musí být součástí cesty, jinak změna zasáhne celý element.
+            if (type.RequiresSubElement && string.IsNullOrWhiteSpace(element.Column))
                 issues.Add(new GtoValidationIssue(GtoValidationIssue.Error, path,
-                    $"Typ {type.Code} vyžaduje v cestě sloupec (fyzický název sloupce v databázi), " +
-                    "jinak se změna vztahuje na celou tabulku."));
+                    $"Typ {type.Code} vyžaduje v cestě {type.SubElementLabel}, " +
+                    "jinak se změna vztahuje na celý element."));
 
-            // Na obrazovce typu seznam se tabulka ve frameworku jmenuje vždy object_list.
+            // Nový element lze podle dokumentace vytvořit jen jako layout nebo popup.
+            if (!string.IsNullOrWhiteSpace(element.CreateElementTyp))
+            {
+                var typ = element.CreateElementTyp!.Trim().ToLowerInvariant();
+                if (typ is not ("layout" or "popup"))
+                    issues.Add(new GtoValidationIssue(GtoValidationIssue.Error, path,
+                        $"in_element_typ může být jen 'layout' nebo 'popup', zadáno '{element.CreateElementTyp}'."));
+
+                var placed = element.Assignments.Any(x => x.Enabled &&
+                    string.Equals(x.PropertyName, "M_Pf_Element.M_Pf_Element_Name", StringComparison.OrdinalIgnoreCase));
+
+                if (!placed)
+                    issues.Add(new GtoValidationIssue(GtoValidationIssue.Warning, path,
+                        "Nově vytvořený element je potřeba zařadit pod existující element – " +
+                        "doplň vlastnost M_Pf_Element.M_Pf_Element_Name."));
+            }
+
+            // Na obrazovce typu seznam se tabulka ve frameworku jmenuje vždy ObjectList.
             if (document.ScreenKind == TpiScreenKind.List &&
                 !string.IsNullOrWhiteSpace(type.ListScreenElementName) &&
                 !string.Equals(element.ElementPath, type.ListScreenElementName, StringComparison.OrdinalIgnoreCase))
@@ -224,9 +253,32 @@ public sealed class GtoScriptGenerator
                     issues.Add(new GtoValidationIssue(GtoValidationIssue.Warning, path,
                         $"Vlastnost '{def.Name}' není určena pro statické GTO."));
 
-                if (a.Mode == GtoMode.Dynamic && !def.AllowDynamic)
+                if (a.Mode is GtoMode.Dynamic or GtoMode.DynamicData && !def.AllowDynamic)
                     issues.Add(new GtoValidationIssue(GtoValidationIssue.Warning, path,
-                        $"Vlastnost '{def.Name}' není určena pro dynamické GTO."));
+                        $"Vlastnost '{def.Name}' nelze konfigurovat v runtime."));
+
+                if (def.Source == GtoPropertySource.CisGto)
+                    issues.Add(new GtoValidationIssue(GtoValidationIssue.Info, path,
+                        $"Vlastnost '{def.Name}' je jen v cis_gto.docx, ne v seznamu GMSG vlastností – " +
+                        "ověř, že v tomto prostředí existuje."));
+
+                // Typ overloadu se uplatní jen u iniciálního (statického) GTO.
+                if (a.Mode != GtoMode.Static && a.OverloadType != GtoOverloadType.Default)
+                    issues.Add(new GtoValidationIssue(GtoValidationIssue.Warning, path,
+                        $"Typ overloadu {a.OverloadTypeName} má význam jen u statického GTO."));
+
+                if (a.OverloadType == GtoOverloadType.Role && string.IsNullOrWhiteSpace(a.RefRole))
+                    issues.Add(new GtoValidationIssue(GtoValidationIssue.Error, path,
+                        "ROLE_OVERLOAD vyžaduje in_ref_role (m_role.id)."));
+
+                if (a.OverloadType == GtoOverloadType.User && string.IsNullOrWhiteSpace(a.RefLogin))
+                    issues.Add(new GtoValidationIssue(GtoValidationIssue.Error, path,
+                        "USER_OVERLOAD vyžaduje in_ref_login (tpi_uzivatel.id)."));
+
+                if (a.OverloadType == GtoOverloadType.Default &&
+                    (!string.IsNullOrWhiteSpace(a.RefRole) || !string.IsNullOrWhiteSpace(a.RefLogin)))
+                    issues.Add(new GtoValidationIssue(GtoValidationIssue.Warning, path,
+                        "DEFAULT_OVERLOAD se nevztahuje na uživatele ani roli – vyplněné in_ref_login/in_ref_role se neuplatní."));
             }
 
             if (type.Code == "CONNECTION")

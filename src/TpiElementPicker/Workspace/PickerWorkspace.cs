@@ -49,8 +49,14 @@ public sealed class PickerWorkspace
     /// <summary>Aktuálně rozpracovaný in_ref_element_path (okno Prvek).</summary>
     public string CurrentElementPath { get; set; } = string.Empty;
 
-    /// <summary>Sloupec nebo event doplňovaný za element_path.</summary>
+    /// <summary>Sloupec, položka menu, záložka nebo event doplňovaný za element_path.</summary>
     public string CurrentSuffix { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Vyplněno, když se má element tímto GTO teprve vytvořit – 'layout' nebo 'popup'
+    /// (parametr in_element_typ).
+    /// </summary>
+    public string? CurrentCreateElementTyp { get; set; }
 
     public string PfName
     {
@@ -87,7 +93,7 @@ public sealed class PickerWorkspace
     public bool PickMode { get; private set; }
 
     /// <summary>
-    /// Typ obrazovky – seznam (tabulka = object_list) nebo detail (formulář).
+    /// Typ obrazovky – seznam (tabulka = ObjectList) nebo detail (formulář).
     /// Ovlivňuje návrh in_ref_element_path a kontroly.
     /// </summary>
     public TpiScreenKind ScreenKind
@@ -114,7 +120,7 @@ public sealed class PickerWorkspace
     public event Action? CatalogReloaded;
     public event Action<TpiScreenKind>? ScreenKindChanged;
 
-    /// <summary>Návrh element_path odvozený z typu prvku (např. object_list na seznamu).</summary>
+    /// <summary>Návrh element_path odvozený z typu prvku (např. ObjectList na seznamu).</summary>
     public event Action<string>? ElementPathSuggested;
 
     public event Action<string>? PfNameChanged;
@@ -219,7 +225,7 @@ public sealed class PickerWorkspace
 
     /// <summary>
     /// Návrh element_path podle typu prvku a typu obrazovky. Na seznamu se tabulka
-    /// (i její sloupce) adresuje jako <c>object_list</c>, proto se z DOM nic odvozovat
+    /// (i její sloupce) adresuje jako <c>ObjectList</c>, proto se z DOM nic odvozovat
     /// nemusí. Vrací null, když typ žádný pevný název nemá.
     /// </summary>
     public string? SuggestPathForType(TpiElementType type)
@@ -235,7 +241,7 @@ public sealed class PickerWorkspace
         CurrentElementPath = suggestion;
         ElementPathSuggested?.Invoke(suggestion);
         Status($"Obrazovka typu seznam – element_path nastaven na '{suggestion}'." +
-               (type.RequiresColumn ? " Doplň ještě fyzický název sloupce." : string.Empty));
+               (type.RequiresSubElement ? $" Doplň ještě {type.SubElementLabel}." : string.Empty));
         return suggestion;
     }
 
@@ -272,7 +278,10 @@ public sealed class PickerWorkspace
             CssSelector = CurrentNode?.Css,
             XPath = CurrentNode?.XPath,
             Attributes = CurrentNode?.Attrs ?? new Dictionary<string, string>(),
-            Assignments = assignments.ToList()
+            Assignments = assignments.ToList(),
+            CreateElementTyp = string.IsNullOrWhiteSpace(CurrentCreateElementTyp)
+                ? null
+                : CurrentCreateElementTyp
         };
 
         if (type.AppendsEvent)

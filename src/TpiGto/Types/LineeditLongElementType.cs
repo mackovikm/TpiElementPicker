@@ -13,6 +13,8 @@ public sealed class LineeditLongElementType : TpiElementType
 
     public override int SortOrder => 110;
 
+    public override bool IncludesWidgetProperties => true;
+
     public override ElementMatchRule MatchRule => new()
     {
         Tags = new[] { "textarea" }
@@ -22,12 +24,14 @@ public sealed class LineeditLongElementType : TpiElementType
     {
         yield return new GtoPropertyDefinition(
             "M_Pf_Dt_Lineedit_Long.Text",
-            "Definice textu lineedit long",
-            GtoValueKind.Text);
+            "Text pole",
+            GtoValueKind.Text,
+            source: GtoPropertySource.CisGto);
 
         yield return new GtoPropertyDefinition(
             "M_Pf_Dt_Lineedit_Long.Html_Style",
-            "CSS styly pro element typu line edit long",
-            GtoValueKind.Css, example: "background-color: #0062cc;border-color: #005cbf;");
+            "CSS styly pole",
+            GtoValueKind.Css,
+            example: "background-color: #0062cc;", source: GtoPropertySource.CisGto);
     }
 }

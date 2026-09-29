@@ -11,3 +11,4 @@ D:\CDT\TPI\TpiElementPicker\src\TpiGto\obj\Debug\net8.0\refint\TpiGto.dll
 D:\CDT\TPI\TpiElementPicker\src\TpiGto\obj\Debug\net8.0\TpiGto.xml
 D:\CDT\TPI\TpiElementPicker\src\TpiGto\obj\Debug\net8.0\TpiGto.pdb
 D:\CDT\TPI\TpiElementPicker\src\TpiGto\obj\Debug\net8.0\ref\TpiGto.dll
+D:\CDT\TPI\TpiElementPicker\src\TpiGto\obj\Debug\net8.0\TpiGto.sourcelink.json

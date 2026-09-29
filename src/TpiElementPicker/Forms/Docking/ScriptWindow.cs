@@ -39,8 +39,15 @@ public sealed class ScriptWindow : ToolWindowBase
         var btnStatic = new ToolStripButton("Statické GTO") { DisplayStyle = ToolStripItemDisplayStyle.Text };
         btnStatic.Click += (_, _) => Generate(GtoMode.Static);
 
-        var btnDynamic = new ToolStripButton("Dynamické GTO") { DisplayStyle = ToolStripItemDisplayStyle.Text };
+        var btnDynamic = new ToolStripButton("Runtime GTO") { DisplayStyle = ToolStripItemDisplayStyle.Text };
         btnDynamic.Click += (_, _) => Generate(GtoMode.Dynamic);
+
+        var btnDynamicData = new ToolStripButton("Runtime nad daty")
+        {
+            DisplayStyle = ToolStripItemDisplayStyle.Text,
+            ToolTipText = "@GATTRIB_OVERLOAD_DATA – provede se až po namapování business dat do GMSG"
+        };
+        btnDynamicData.Click += (_, _) => Generate(GtoMode.DynamicData);
 
         var btnAll = new ToolStripButton("Vše") { DisplayStyle = ToolStripItemDisplayStyle.Text };
         btnAll.Click += (_, _) => Generate(null);
@@ -55,7 +62,7 @@ public sealed class ScriptWindow : ToolWindowBase
 
         toolbar.Items.AddRange(new ToolStripItem[]
         {
-            btnStatic, btnDynamic, btnAll, new ToolStripSeparator(),
+            btnStatic, btnDynamic, btnDynamicData, btnAll, new ToolStripSeparator(),
             btnCopy, btnSave, new ToolStripSeparator(), host
         });
 

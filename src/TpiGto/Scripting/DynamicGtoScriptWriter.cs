@@ -5,12 +5,26 @@ using TpiGto.Model;
 namespace TpiGto.Scripting;
 
 /// <summary>
-/// Dynamické GTO podle dynamicke_GTO.docx – makro @GATTRIB_OVERLOAD, které se vkládá
-/// do theSql plain bloku MWF. Volitelně obalí makra kostrou MWF podle frameworkTPI.docx.
+/// Runtime GTO podle dynamicke_GTO.docx – makro <c>@GATTRIB_OVERLOAD</c>, které se
+/// vkládá do theSql plain bloku MWF. V režimu <see cref="GtoMode.DynamicData"/> píše
+/// <c>@GATTRIB_OVERLOAD_DATA</c>, které se provede až po namapování business dat do
+/// GMSG. Volitelně obalí makra kostrou MWF podle frameworkTPI.docx.
 /// </summary>
 public sealed class DynamicGtoScriptWriter : IGtoScriptWriter
 {
-    public GtoMode Mode => GtoMode.Dynamic;
+    private readonly string _macro;
+
+    public DynamicGtoScriptWriter(GtoMode mode = GtoMode.Dynamic)
+    {
+        if (mode is not (GtoMode.Dynamic or GtoMode.DynamicData))
+            throw new ArgumentOutOfRangeException(nameof(mode),
+                "Zapisovač podporuje jen runtime režimy GTO.");
+
+        Mode = mode;
+        _macro = mode == GtoMode.DynamicData ? "@GATTRIB_OVERLOAD_DATA" : "@GATTRIB_OVERLOAD";
+    }
+
+    public GtoMode Mode { get; }
 
     public void WriteBlock(StringBuilder sb, GtoBlockContext ctx)
     {
@@ -22,7 +36,7 @@ public sealed class DynamicGtoScriptWriter : IGtoScriptWriter
             sb.AppendLine($"-- {a.Note}");
 
         sb.AppendLine(
-            $"@GATTRIB_OVERLOAD({GtoValueFormatter.Quote(a.PropertyName)}," +
+            $"{_macro}({GtoValueFormatter.Quote(a.PropertyName)}," +
             $"{GtoValueFormatter.Quote(ctx.ElementPath)}," +
             $"{GtoValueFormatter.ForMacro(a.Value, kind)});");
     }

@@ -14,7 +14,7 @@
         </member>
         <member name="P:TpiGto.Mapping.ElementMappingDocument.ScreenKind">
             <summary>
-            Typ obrazovky – na seznamu se tabulka jmenuje object_list, na detailu má
+            Typ obrazovky – na seznamu se tabulka jmenuje ObjectList, na detailu má
             element vlastní název v rámci page flow.
             </summary>
         </member>
@@ -22,10 +22,44 @@
             <summary>Způsob zápisu GTO.</summary>
         </member>
         <member name="F:TpiGto.Mapping.GtoMode.Static">
-            <summary>Samostatný skript s CREATE_GATTRIB_OVERLOAD – trvalá úprava vzhledu.</summary>
+            <summary>
+            Iniciální (statické) GTO – samostatný skript s CREATE_GATTRIB_OVERLOAD.
+            Konfigurace zůstane i po pregenerování PageFlow a použije se při jeho inicializaci.
+            </summary>
         </member>
         <member name="F:TpiGto.Mapping.GtoMode.Dynamic">
-            <summary>Makro @GATTRIB_OVERLOAD v plain bloku MWF – úprava až po spuštění MWF.</summary>
+            <summary>
+            Runtime GTO – makro <c>@GATTRIB_OVERLOAD</c> v MWF. Platí pro konkrétní
+            iteraci (sekvenci) PageFlow.
+            </summary>
+        </member>
+        <member name="F:TpiGto.Mapping.GtoMode.DynamicData">
+            <summary>
+            Runtime GTO nad daty – makro <c>@GATTRIB_OVERLOAD_DATA</c>. Provede se až po
+            namapování business dat do GMSG, takže hodnota může na datech záviset
+            (např. obarvit pole podle jeho hodnoty).
+            </summary>
+        </member>
+        <member name="T:TpiGto.Mapping.GtoOverloadType">
+            <summary>
+            Typ iniciálního overloadu – určuje, kdy a pro koho se spustí
+            (Gattrib_Overload.docx, sloupec TYP).
+            </summary>
+        </member>
+        <member name="F:TpiGto.Mapping.GtoOverloadType.Default">
+            <summary>Spouští se při inicializaci PageFlow, nezávisle na uživateli i roli.</summary>
+        </member>
+        <member name="F:TpiGto.Mapping.GtoOverloadType.Role">
+            <summary>Podle role přihlášeného uživatele – vyžaduje m_role.id v in_ref_role.</summary>
+        </member>
+        <member name="F:TpiGto.Mapping.GtoOverloadType.User">
+            <summary>Podle přihlášeného uživatele – vyžaduje tpi_uzivatel.id v in_ref_login.</summary>
+        </member>
+        <member name="F:TpiGto.Mapping.GtoOverloadType.Security">
+            <summary>
+            Bezpečnostní overload – spouští se při inicializaci i při každé iteraci,
+            takže přebije i runtime overload.
+            </summary>
         </member>
         <member name="T:TpiGto.Mapping.GtoAssignment">
             <summary>
@@ -38,17 +72,29 @@
         <member name="P:TpiGto.Mapping.GtoAssignment.Value">
             <summary>Hodnota in_new_value (u dynamického GTO 3. parametr makra).</summary>
         </member>
+        <member name="P:TpiGto.Mapping.GtoAssignment.OverloadType">
+            <summary>Typ overloadu – uplatní se jen u statického GTO.</summary>
+        </member>
+        <member name="P:TpiGto.Mapping.GtoAssignment.RefLogin">
+            <summary>in_ref_login – tpi_uzivatel.id, povinné pro USER_OVERLOAD.</summary>
+        </member>
+        <member name="P:TpiGto.Mapping.GtoAssignment.RefRole">
+            <summary>in_ref_role – m_role.id, povinné pro ROLE_OVERLOAD.</summary>
+        </member>
         <member name="P:TpiGto.Mapping.GtoAssignment.Order">
-            <summary>in_poradi – podle dokumentace vždy 1.</summary>
+            <summary>in_poradi – pořadí, v jakém se overloady vykonají.</summary>
         </member>
         <member name="P:TpiGto.Mapping.GtoAssignment.Cancelled">
             <summary>in_zruseno – 0 pro zavedení, 1 pro zrušení existujícího.</summary>
         </member>
         <member name="P:TpiGto.Mapping.GtoAssignment.Note">
-            <summary>Poznámka k zadání (nepromítá se do skriptu).</summary>
+            <summary>Poznámka k zadání (nepromítá se do skriptu jinak než komentářem).</summary>
         </member>
         <member name="P:TpiGto.Mapping.GtoAssignment.Enabled">
             <summary>Vlastnost se vygeneruje jen když je zaškrtnutá.</summary>
+        </member>
+        <member name="P:TpiGto.Mapping.GtoAssignment.OverloadTypeName">
+            <summary>Hodnota parametru in_gattrib_overload_typ.</summary>
         </member>
         <member name="T:TpiGto.Mapping.MappedElement">
             <summary>Prvek stránky, kterému uživatel přiřadil typ TPI a vlastnosti GTO.</summary>
@@ -66,7 +112,17 @@
             <summary>Event u typu CONNECTION (blur, click, right_click…).</summary>
         </member>
         <member name="P:TpiGto.Mapping.MappedElement.Column">
-            <summary>Sloupec u typů TABLE_COLUMN / COMBOBOX_COLUMN.</summary>
+            <summary>
+            Podřízený prvek doplněný do cesty – sloupec tabulky, položka menu nebo záložka
+            (M_PF_DT_TABLE_COLUMN.NAME / M_PF_DT_MENU_ITEM.NAME / M_PF_DT_TAB_ITEM.NAME).
+            </summary>
+        </member>
+        <member name="P:TpiGto.Mapping.MappedElement.CreateElementTyp">
+            <summary>
+            Vyplněno, pokud se tímto GTO má nový element teprve vytvořit – hodnota
+            parametru in_element_typ (<c>layout</c> nebo <c>popup</c>). Nový element se
+            pak musí zařadit pod existující element vlastností M_Pf_Element.M_Pf_Element_Name.
+            </summary>
         </member>
         <member name="P:TpiGto.Mapping.MappedElement.Label">
             <summary>Popisek pro orientaci v seznamu (text prvku, label).</summary>
@@ -91,9 +147,27 @@
         </member>
         <member name="T:TpiGto.Model.CommonGtoProperties">
             <summary>
-            Vlastnosti M_Pf_Element.*, které lze podle číselníku použít na libovolný element.
-            Registr je přidává ke každému typu, který má <see cref="P:TpiGto.Model.TpiElementType.IncludesCommonProperties"/> = true.
+            Vlastnosti, které nepatří jednomu typu prvku.
+            <para>
+            <see cref="P:TpiGto.Model.CommonGtoProperties.Element"/> – M_Pf_Element.* lze podle číselníku GMSG použít na libovolný
+            element; registr je přidává ke každému typu s
+            <see cref="P:TpiGto.Model.TpiElementType.IncludesCommonProperties"/>.
+            </para>
+            <para>
+            <see cref="P:TpiGto.Model.CommonGtoProperties.Widget"/> – M_Pf_Widget.* má každý vizuální element (layout, popup,
+            tabulka, lineedit…); registr je přidává k typům s
+            <see cref="P:TpiGto.Model.TpiElementType.IncludesWidgetProperties"/>.
+            </para>
             </summary>
+        </member>
+        <member name="P:TpiGto.Model.CommonGtoProperties.Element">
+            <summary>Obecné vlastnosti elementu – M_Pf_Element.*.</summary>
+        </member>
+        <member name="P:TpiGto.Model.CommonGtoProperties.Widget">
+            <summary>Vlastnosti widgetu – velikost, pozice, dostupnost.</summary>
+        </member>
+        <member name="P:TpiGto.Model.CommonGtoProperties.All">
+            <summary>Zpětná kompatibilita – dřívější název pro <see cref="P:TpiGto.Model.CommonGtoProperties.Element"/>.</summary>
         </member>
         <member name="T:TpiGto.Model.ElementMatchRule">
             <summary>
@@ -118,9 +192,24 @@
             Skóre shody s daným prvkem. 0 = neshoda. Používá <see cref="T:TpiGto.Matching.ElementTypeMatcher"/>.
             </summary>
         </member>
+        <member name="T:TpiGto.Model.GtoPropertySource">
+            <summary>Odkud definice vlastnosti pochází.</summary>
+        </member>
+        <member name="F:TpiGto.Model.GtoPropertySource.GmsgCatalogue">
+            <summary>Seznam vlastností GMSG z Gattrib_Overload.docx (m_cis_gattrib_overload).</summary>
+        </member>
+        <member name="F:TpiGto.Model.GtoPropertySource.CisGto">
+            <summary>Číselník cis_gto.docx – výběr, který používá tým.</summary>
+        </member>
+        <member name="F:TpiGto.Model.GtoPropertySource.Documentation">
+            <summary>Doloženo v katalogu maker nebo v jiné dokumentaci, ne v seznamu GMSG.</summary>
+        </member>
+        <member name="F:TpiGto.Model.GtoPropertySource.Custom">
+            <summary>Vlastní rozšíření (JSON nebo vlastní třída).</summary>
+        </member>
         <member name="T:TpiGto.Model.GtoPropertyDefinition">
             <summary>
-            Definice jedné vlastnosti z číselníku GTO (cis_gto.docx) – hodnota parametru
+            Definice jedné vlastnosti GMSG, kterou lze přetížit – hodnota parametru
             <c>in_gattrib_overload_name</c> u statického GTO, resp. 1. parametr makra
             <c>@GATTRIB_OVERLOAD</c> u dynamického GTO.
             </summary>
@@ -129,16 +218,23 @@
             <summary>Např. <c>M_Pf_Dt_Button.Text</c>.</summary>
         </member>
         <member name="P:TpiGto.Model.GtoPropertyDefinition.Description">
-            <summary>Popis z číselníku cis_gto.docx.</summary>
+            <summary>Popis vlastnosti.</summary>
         </member>
         <member name="P:TpiGto.Model.GtoPropertyDefinition.AllowStatic">
             <summary>Lze použít ve statickém GTO (CREATE_GATTRIB_OVERLOAD).</summary>
         </member>
         <member name="P:TpiGto.Model.GtoPropertyDefinition.AllowDynamic">
-            <summary>Lze použít v dynamickém GTO (@GATTRIB_OVERLOAD v plain bloku MWF).</summary>
+            <summary>Lze použít v dynamickém GTO (@GATTRIB_OVERLOAD v MWF).</summary>
         </member>
         <member name="P:TpiGto.Model.GtoPropertyDefinition.Example">
             <summary>Ukázková hodnota (zobrazuje se jako nápověda).</summary>
+        </member>
+        <member name="P:TpiGto.Model.GtoPropertyDefinition.GmsgId">
+            <summary>
+            ID z číselníku <c>M_CIS_GATTRIB_OVERLOAD</c> – pro vlastnosti doložené
+            seznamem GMSG v Gattrib_Overload.docx. Používá se při zápisu konfigurace
+            přímo do <c>M_GATTRIB_OVERLOAD_GMSG</c>.
+            </summary>
         </member>
         <member name="P:TpiGto.Model.GtoPropertyDefinition.Group">
             <summary>Skupina vlastnosti = část názvu před tečkou, např. <c>M_Pf_Dt_Button</c>.</summary>
@@ -147,7 +243,8 @@
             <summary>
             Kategorie odvozená z názvu – framework rozlišuje vlastnosti pro data/text
             (<c>M_Pf_Dt_*</c>), pro vzhled (<c>M_Pf_*</c>), obecné vlastnosti elementu
-            (<c>M_Pf_Element.*</c>) a napojení událostí (<c>M_Pf_Connection.*</c>).
+            (<c>M_Pf_Element.*</c>, <c>M_Pf_Widget.*</c>) a napojení událostí
+            (<c>M_Pf_Connection.*</c>).
             </summary>
         </member>
         <member name="T:TpiGto.Model.GtoValueKind">
@@ -242,14 +339,23 @@
         <member name="P:TpiGto.Model.TpiElementType.ListScreenElementName">
             <summary>
             Název elementu, který tento typ má na obrazovce typu seznam – např. tabulka
-            seznamu se ve frameworku vždy jmenuje <c>object_list</c>. Aplikace ho použije
+            seznamu se ve frameworku vždy jmenuje <c>ObjectList</c>. Aplikace ho použije
             jako návrh in_ref_element_path. Null = odvozuje se z prvku stránky.
             </summary>
         </member>
-        <member name="P:TpiGto.Model.TpiElementType.RequiresColumn">
+        <member name="P:TpiGto.Model.TpiElementType.RequiresSubElement">
             <summary>
-            True, pokud element_path musí obsahovat i sloupec (fyzický název sloupce
-            v databázi) – bez něj by se změna vztahovala na celou tabulku.
+            True, pokud element_path musí obsahovat i podřízený prvek – sloupec tabulky,
+            položku menu nebo záložku. Bez něj by se změna vztahovala na celý element.
+            </summary>
+        </member>
+        <member name="P:TpiGto.Model.TpiElementType.SubElementLabel">
+            <summary>Jak se podřízený prvek jmenuje (pro nápovědu v UI).</summary>
+        </member>
+        <member name="P:TpiGto.Model.TpiElementType.IncludesWidgetProperties">
+            <summary>
+            True, pokud má element i widget (velikost, pozice, enabled) – registr pak
+            k typu přidá vlastnosti M_Pf_Widget.*.
             </summary>
         </member>
         <member name="P:TpiGto.Model.TpiElementType.AppendsEvent">
@@ -303,8 +409,8 @@
         <member name="F:TpiGto.Model.TpiScreenKind.List">
             <summary>
             Seznam – obraz celé databázové tabulky. Element celé tabulky se ve frameworku
-            jmenuje vždy <c>object_list</c>; sloupec se adresuje jako
-            <c>object_list.&lt;FYZICKÝ_NÁZEV_SLOUPCE&gt;</c>.
+            jmenuje vždy <c>ObjectList</c>; sloupec se adresuje jako
+            <c>ObjectList.&lt;FYZICKÝ_NÁZEV_SLOUPCE&gt;</c>.
             </summary>
         </member>
         <member name="F:TpiGto.Model.TpiScreenKind.Detail">
@@ -433,10 +539,16 @@
             </summary>
         </member>
         <member name="P:TpiGto.Registry.JsonElementTypeProvider.JsonType.ListScreenElementName">
-            <summary>Např. object_list pro tabulku na obrazovce typu seznam.</summary>
+            <summary>Např. ObjectList pro tabulku na obrazovce typu seznam.</summary>
         </member>
-        <member name="P:TpiGto.Registry.JsonElementTypeProvider.JsonType.RequiresColumn">
-            <summary>Vyžaduje sloupec v element_path.</summary>
+        <member name="P:TpiGto.Registry.JsonElementTypeProvider.JsonType.RequiresSubElement">
+            <summary>Vyžaduje v element_path podřízený prvek (sloupec, položku menu, záložku).</summary>
+        </member>
+        <member name="P:TpiGto.Registry.JsonElementTypeProvider.JsonType.SubElementLabel">
+            <summary>Jak se podřízený prvek jmenuje (nápověda v UI).</summary>
+        </member>
+        <member name="P:TpiGto.Registry.JsonElementTypeProvider.JsonType.IncludesWidgetProperties">
+            <summary>Přidat k typu vlastnosti M_Pf_Widget.*.</summary>
         </member>
         <member name="P:TpiGto.Registry.JsonElementTypeProvider.JsonProperty.ValueKind">
             <summary>Text | Bool01 | Number | Css | Color | MwfName | ElementName | Sql</summary>
@@ -460,6 +572,9 @@
         <member name="P:TpiGto.Registry.TpiTypeRegistry.CommonProperties">
             <summary>Společné vlastnosti M_Pf_Element.* přidávané k typům.</summary>
         </member>
+        <member name="P:TpiGto.Registry.TpiTypeRegistry.WidgetProperties">
+            <summary>Vlastnosti widgetu M_Pf_Widget.* přidávané k vizuálním typům.</summary>
+        </member>
         <member name="M:TpiGto.Registry.TpiTypeRegistry.Reload">
             <summary>Znovu načte typy ze všech zdrojů (např. po ruční úpravě JSON souboru).</summary>
         </member>
@@ -473,8 +588,10 @@
         </member>
         <member name="T:TpiGto.Scripting.DynamicGtoScriptWriter">
             <summary>
-            Dynamické GTO podle dynamicke_GTO.docx – makro @GATTRIB_OVERLOAD, které se vkládá
-            do theSql plain bloku MWF. Volitelně obalí makra kostrou MWF podle frameworkTPI.docx.
+            Runtime GTO podle dynamicke_GTO.docx – makro <c>@GATTRIB_OVERLOAD</c>, které se
+            vkládá do theSql plain bloku MWF. V režimu <see cref="F:TpiGto.Mapping.GtoMode.DynamicData"/> píše
+            <c>@GATTRIB_OVERLOAD_DATA</c>, které se provede až po namapování business dat do
+            GMSG. Volitelně obalí makra kostrou MWF podle frameworkTPI.docx.
             </summary>
         </member>
         <member name="T:TpiGto.Scripting.GtoValidationIssue">
@@ -579,69 +696,92 @@
         </member>
         <member name="T:TpiGto.Scripting.StaticGtoScriptWriter">
             <summary>
-            Statické GTO podle staticke_GTO.docx – samostatný skript s bloky
-            SRV.GENDEF_OBJ.CREATE_GATTRIB_OVERLOAD.
+            Iniciální (statické) GTO podle staticke_GTO.docx a Gattrib_Overload.docx – samostatný
+            skript s bloky SRV.GENDEF_OBJ.CREATE_GATTRIB_OVERLOAD. Konfigurace přežije
+            pregenerování PageFlow a použije se při jeho inicializaci.
             </summary>
         </member>
+        <member name="M:TpiGto.Scripting.StaticGtoScriptWriter.Reference(System.String)">
+            <summary>in_ref_login / in_ref_role – ID se zapisuje bez apostrofů.</summary>
+        </member>
         <member name="T:TpiGto.Types.AssignerElementType">
-            <summary>Element typu assigner (přiřazovací prvek). Podporuje event right_click.</summary>
+            <summary>Nabídka hodnot k výběru, když se nehodí combobox. Podporuje event right_click.</summary>
         </member>
         <member name="T:TpiGto.Types.ButtonElementType">
-            <summary>Tlačítko na obrazovce.</summary>
+            <summary>Tlačítko na obrazovce. Vlastnímu tlačítku lze nastavit Before/MWF/After.</summary>
         </member>
         <member name="T:TpiGto.Types.ComboboxColumnElementType">
             <summary>Sloupec zobrazený v comboboxu.</summary>
         </member>
         <member name="T:TpiGto.Types.ComboboxElementType">
-            <summary>Rozbalovací seznam.</summary>
+            <summary>Rozbalovací seznam. Podporuje event right_click.</summary>
+        </member>
+        <member name="T:TpiGto.Types.ComboboxValueElementType">
+            <summary>Konkrétní hodnota v comboboxu.</summary>
         </member>
         <member name="T:TpiGto.Types.ConnectionElementType">
-            <summary>Připnutí MWF na akci uživatele. Do element_path se doplňuje event.</summary>
+            <summary>Připnutí MWF na akci uživatele. Do cesty se přidává typ eventu.</summary>
         </member>
         <member name="T:TpiGto.Types.GenericElementType">
-            <summary>Element bez specifického typu – jen společné vlastnosti M_Pf_Element.*.</summary>
+            <summary>Element bez specifického typu – jen společné vlastnosti M_Pf_Element.* a M_Pf_Widget.*.</summary>
         </member>
         <member name="T:TpiGto.Types.LabelElementType">
-            <summary>Textový popisek.</summary>
+            <summary>Textový popisek. Každý nápis na obrazovce je samostatný element.</summary>
         </member>
         <member name="T:TpiGto.Types.LayoutElementType">
-            <summary>Kontejner / rozvržení části obrazovky.</summary>
+            <summary>Kontejner / rozvržení části obrazovky. Layout lze přes GTO i nově vytvořit.</summary>
         </member>
         <member name="T:TpiGto.Types.LineeditElementType">
-            <summary>Jednořádkové vstupní pole, ve frameworku typicky ..._Field.</summary>
+            <summary>Jednořádkové vstupní pole, ve frameworku typicky ..._Field. Podporuje event blur a right_click.</summary>
         </member>
         <member name="T:TpiGto.Types.LineeditLongElementType">
             <summary>Víceřádkové textové pole.</summary>
         </member>
+        <member name="T:TpiGto.Types.ListElementType">
+            <summary>Element typu list.</summary>
+        </member>
+        <member name="T:TpiGto.Types.ListItemElementType">
+            <summary>Jedna položka elementu list.</summary>
+        </member>
+        <member name="T:TpiGto.Types.MapElementType">
+            <summary>Mapový element (tematizace). Podporuje event right_click a shift_click.</summary>
+        </member>
         <member name="T:TpiGto.Types.MenuItemElementType">
-            <summary>Položka menu, např. MainMenu.PZSV_MWF_POSUN_TERMINU_ETAPY.</summary>
+            <summary>Položka menu. Do cesty se přidává M_PF_DT_MENU_ITEM.NAME.</summary>
+        </member>
+        <member name="T:TpiGto.Types.PopupElementType">
+            <summary>Vyskakovací okno. Popup lze přes GTO i nově vytvořit (in_element_typ = popup).</summary>
         </member>
         <member name="T:TpiGto.Types.TabElementType">
-            <summary>Hlavní element se záložkami, např. RelTabs.</summary>
+            <summary>Element se záložkami, typicky RelTabs.</summary>
         </member>
         <member name="T:TpiGto.Types.TabItemElementType">
-            <summary>Jedna záložka uvnitř záložkového kontejneru.</summary>
+            <summary>Jedna záložka. Do cesty se přidává M_PF_DT_TAB_ITEM.NAME, typicky název child tabulky.</summary>
         </member>
         <member name="T:TpiGto.Types.TableColumnElementType">
-            <summary>Sloupec tabulky.</summary>
+            <summary>Sloupec tabulky. Do cesty se přidává M_PF_DT_TABLE_COLUMN.NAME – fyzický název sloupce v databázi.</summary>
         </member>
         <member name="P:TpiGto.Types.TableColumnElementType.ListScreenElementName">
-            <summary>Na obrazovce typu seznam je tabulkou object_list.</summary>
+            <summary>Tabulka seznamu se ve frameworku jmenuje ObjectList.</summary>
         </member>
-        <member name="P:TpiGto.Types.TableColumnElementType.RequiresColumn">
-            <summary>Bez sloupce by se změna vztahovala na celou tabulku.</summary>
-        </member>
-        <member name="T:TpiGto.Types.TableElementType">
-            <summary>Datová tabulka na obrazovce, např. child_PZSV_KOL_LOZE.</summary>
-        </member>
+        <!-- Badly formed XML comment ignored for member "T:TpiGto.Types.TableElementType" -->
         <member name="P:TpiGto.Types.TableElementType.ListScreenElementName">
-            <summary>Na obrazovce typu seznam se tabulka ve frameworku jmenuje vždy object_list.</summary>
+            <summary>Tabulka seznamu se ve frameworku jmenuje ObjectList.</summary>
+        </member>
+        <member name="T:TpiGto.Types.TableSelectedRowElementType">
+            <summary>Označení řádku tabulky. Řádky jde označovat i makrem @MARK_TABLE_ROWS.</summary>
         </member>
         <member name="T:TpiGto.Types.TableValueElementType">
             <summary>Konkrétní hodnota / buňka tabulky.</summary>
         </member>
+        <member name="T:TpiGto.Types.TreeElementType">
+            <summary>Stromový element. Podporuje event right_click.</summary>
+        </member>
+        <member name="T:TpiGto.Types.TreeNodeElementType">
+            <summary>Jeden uzel stromu.</summary>
+        </member>
         <member name="T:TpiGto.Types.WindowElementType">
-            <summary>Celá obrazovka / PageFlow okno.</summary>
+            <summary>Celá obrazovka. Sem patří i nastavení vstupních bodů PageFlow (M_Pf.*), které se zadávají na element Window.</summary>
         </member>
     </members>
 </doc>

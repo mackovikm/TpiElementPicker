@@ -13,7 +13,7 @@ public sealed class ElementMappingDocument
     public string PfName { get; set; } = string.Empty;
 
     /// <summary>
-    /// Typ obrazovky – na seznamu se tabulka jmenuje object_list, na detailu má
+    /// Typ obrazovky – na seznamu se tabulka jmenuje ObjectList, na detailu má
     /// element vlastní název v rámci page flow.
     /// </summary>
     public TpiScreenKind ScreenKind { get; set; } = TpiScreenKind.Unknown;
