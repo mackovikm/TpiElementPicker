@@ -1,0 +1,13 @@
+D:\CDT\TPI\TpiElementPicker\src\TpiGto\bin\Debug\net8.0\TpiGto.deps.json
+D:\CDT\TPI\TpiElementPicker\src\TpiGto\bin\Debug\net8.0\TpiGto.dll
+D:\CDT\TPI\TpiElementPicker\src\TpiGto\bin\Debug\net8.0\TpiGto.pdb
+D:\CDT\TPI\TpiElementPicker\src\TpiGto\bin\Debug\net8.0\TpiGto.xml
+D:\CDT\TPI\TpiElementPicker\src\TpiGto\obj\Debug\net8.0\TpiGto.GeneratedMSBuildEditorConfig.editorconfig
+D:\CDT\TPI\TpiElementPicker\src\TpiGto\obj\Debug\net8.0\TpiGto.AssemblyInfoInputs.cache
+D:\CDT\TPI\TpiElementPicker\src\TpiGto\obj\Debug\net8.0\TpiGto.AssemblyInfo.cs
+D:\CDT\TPI\TpiElementPicker\src\TpiGto\obj\Debug\net8.0\TpiGto.csproj.CoreCompileInputs.cache
+D:\CDT\TPI\TpiElementPicker\src\TpiGto\obj\Debug\net8.0\TpiGto.dll
+D:\CDT\TPI\TpiElementPicker\src\TpiGto\obj\Debug\net8.0\refint\TpiGto.dll
+D:\CDT\TPI\TpiElementPicker\src\TpiGto\obj\Debug\net8.0\TpiGto.xml
+D:\CDT\TPI\TpiElementPicker\src\TpiGto\obj\Debug\net8.0\TpiGto.pdb
+D:\CDT\TPI\TpiElementPicker\src\TpiGto\obj\Debug\net8.0\ref\TpiGto.dll

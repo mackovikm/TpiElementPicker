@@ -1,0 +1,647 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>TpiGto</name>
+    </assembly>
+    <members>
+        <member name="T:TpiGto.Mapping.ElementMappingDocument">
+            <summary>
+            Uložené mapování jedné obrazovky – vstup pro generátor Oracle skriptů.
+            </summary>
+        </member>
+        <member name="P:TpiGto.Mapping.ElementMappingDocument.PfName">
+            <summary>in_pf_name – název PageFlow, ke kterému mapování patří.</summary>
+        </member>
+        <member name="P:TpiGto.Mapping.ElementMappingDocument.ScreenKind">
+            <summary>
+            Typ obrazovky – na seznamu se tabulka jmenuje object_list, na detailu má
+            element vlastní název v rámci page flow.
+            </summary>
+        </member>
+        <member name="T:TpiGto.Mapping.GtoMode">
+            <summary>Způsob zápisu GTO.</summary>
+        </member>
+        <member name="F:TpiGto.Mapping.GtoMode.Static">
+            <summary>Samostatný skript s CREATE_GATTRIB_OVERLOAD – trvalá úprava vzhledu.</summary>
+        </member>
+        <member name="F:TpiGto.Mapping.GtoMode.Dynamic">
+            <summary>Makro @GATTRIB_OVERLOAD v plain bloku MWF – úprava až po spuštění MWF.</summary>
+        </member>
+        <member name="T:TpiGto.Mapping.GtoAssignment">
+            <summary>
+            Jedna nastavená vlastnost prvku = jeden blok GTO.
+            </summary>
+        </member>
+        <member name="P:TpiGto.Mapping.GtoAssignment.PropertyName">
+            <summary>Hodnota in_gattrib_overload_name, např. M_Pf_Dt_Button.Text.</summary>
+        </member>
+        <member name="P:TpiGto.Mapping.GtoAssignment.Value">
+            <summary>Hodnota in_new_value (u dynamického GTO 3. parametr makra).</summary>
+        </member>
+        <member name="P:TpiGto.Mapping.GtoAssignment.Order">
+            <summary>in_poradi – podle dokumentace vždy 1.</summary>
+        </member>
+        <member name="P:TpiGto.Mapping.GtoAssignment.Cancelled">
+            <summary>in_zruseno – 0 pro zavedení, 1 pro zrušení existujícího.</summary>
+        </member>
+        <member name="P:TpiGto.Mapping.GtoAssignment.Note">
+            <summary>Poznámka k zadání (nepromítá se do skriptu).</summary>
+        </member>
+        <member name="P:TpiGto.Mapping.GtoAssignment.Enabled">
+            <summary>Vlastnost se vygeneruje jen když je zaškrtnutá.</summary>
+        </member>
+        <member name="T:TpiGto.Mapping.MappedElement">
+            <summary>Prvek stránky, kterému uživatel přiřadil typ TPI a vlastnosti GTO.</summary>
+        </member>
+        <member name="P:TpiGto.Mapping.MappedElement.ElementPath">
+            <summary>in_ref_element_path – název elementu ve frameworku TPI.</summary>
+        </member>
+        <member name="P:TpiGto.Mapping.MappedElement.TypeCode">
+            <summary>Kód typu z číselníku, např. LINEEDIT.</summary>
+        </member>
+        <member name="P:TpiGto.Mapping.MappedElement.TypeName">
+            <summary>Zobrazovaný název typu (jen pro čitelnost exportu).</summary>
+        </member>
+        <member name="P:TpiGto.Mapping.MappedElement.EventCode">
+            <summary>Event u typu CONNECTION (blur, click, right_click…).</summary>
+        </member>
+        <member name="P:TpiGto.Mapping.MappedElement.Column">
+            <summary>Sloupec u typů TABLE_COLUMN / COMBOBOX_COLUMN.</summary>
+        </member>
+        <member name="P:TpiGto.Mapping.MappedElement.Label">
+            <summary>Popisek pro orientaci v seznamu (text prvku, label).</summary>
+        </member>
+        <member name="M:TpiGto.Mapping.MappedElement.EffectivePath(System.String)">
+            <summary>Výsledný element_path včetně sloupce nebo eventu.</summary>
+        </member>
+        <member name="T:TpiGto.Matching.ElementTypeSuggestion">
+            <summary>Návrh typu prvku podle kliknutého prvku stránky.</summary>
+        </member>
+        <member name="T:TpiGto.Matching.ElementTypeMatcher">
+            <summary>
+            Vybírá typ prvku, který se po kliknutí předvyplní. Pravidla dodává každý typ
+            sám přes <see cref="P:TpiGto.Model.TpiElementType.MatchRule"/>, matcher je jen vyhodnocuje.
+            </summary>
+        </member>
+        <member name="M:TpiGto.Matching.ElementTypeMatcher.Suggest(TpiGto.Model.IElementDescriptor)">
+            <summary>Všechny typy se skóre &gt; 0, seřazené od nejpravděpodobnějšího.</summary>
+        </member>
+        <member name="M:TpiGto.Matching.ElementTypeMatcher.Best(TpiGto.Model.IElementDescriptor)">
+            <summary>Nejpravděpodobnější typ, jinak obecný ELEMENT.</summary>
+        </member>
+        <member name="T:TpiGto.Model.CommonGtoProperties">
+            <summary>
+            Vlastnosti M_Pf_Element.*, které lze podle číselníku použít na libovolný element.
+            Registr je přidává ke každému typu, který má <see cref="P:TpiGto.Model.TpiElementType.IncludesCommonProperties"/> = true.
+            </summary>
+        </member>
+        <member name="T:TpiGto.Model.ElementMatchRule">
+            <summary>
+            Pravidlo, podle kterého se typu prvku nabízí ke kliknutému prvku stránky.
+            Slouží jen k předvyplnění nabídky – uživatel může typ vždy přepsat.
+            </summary>
+        </member>
+        <member name="P:TpiGto.Model.ElementMatchRule.ClassHints">
+            <summary>Podřetězce hledané v CSS třídách prvku.</summary>
+        </member>
+        <member name="P:TpiGto.Model.ElementMatchRule.NameHints">
+            <summary>Podřetězce hledané v id / name prvku.</summary>
+        </member>
+        <member name="P:TpiGto.Model.ElementMatchRule.Attributes">
+            <summary>Atributy, jejichž samotná přítomnost typ indikuje (např. data-tpi-type).</summary>
+        </member>
+        <member name="P:TpiGto.Model.ElementMatchRule.Weight">
+            <summary>Základní váha pravidla – vyšší číslo vyhrává při shodě více typů.</summary>
+        </member>
+        <member name="M:TpiGto.Model.ElementMatchRule.Score(TpiGto.Model.IElementDescriptor)">
+            <summary>
+            Skóre shody s daným prvkem. 0 = neshoda. Používá <see cref="T:TpiGto.Matching.ElementTypeMatcher"/>.
+            </summary>
+        </member>
+        <member name="T:TpiGto.Model.GtoPropertyDefinition">
+            <summary>
+            Definice jedné vlastnosti z číselníku GTO (cis_gto.docx) – hodnota parametru
+            <c>in_gattrib_overload_name</c> u statického GTO, resp. 1. parametr makra
+            <c>@GATTRIB_OVERLOAD</c> u dynamického GTO.
+            </summary>
+        </member>
+        <member name="P:TpiGto.Model.GtoPropertyDefinition.Name">
+            <summary>Např. <c>M_Pf_Dt_Button.Text</c>.</summary>
+        </member>
+        <member name="P:TpiGto.Model.GtoPropertyDefinition.Description">
+            <summary>Popis z číselníku cis_gto.docx.</summary>
+        </member>
+        <member name="P:TpiGto.Model.GtoPropertyDefinition.AllowStatic">
+            <summary>Lze použít ve statickém GTO (CREATE_GATTRIB_OVERLOAD).</summary>
+        </member>
+        <member name="P:TpiGto.Model.GtoPropertyDefinition.AllowDynamic">
+            <summary>Lze použít v dynamickém GTO (@GATTRIB_OVERLOAD v plain bloku MWF).</summary>
+        </member>
+        <member name="P:TpiGto.Model.GtoPropertyDefinition.Example">
+            <summary>Ukázková hodnota (zobrazuje se jako nápověda).</summary>
+        </member>
+        <member name="P:TpiGto.Model.GtoPropertyDefinition.Group">
+            <summary>Skupina vlastnosti = část názvu před tečkou, např. <c>M_Pf_Dt_Button</c>.</summary>
+        </member>
+        <member name="P:TpiGto.Model.GtoPropertyDefinition.Category">
+            <summary>
+            Kategorie odvozená z názvu – framework rozlišuje vlastnosti pro data/text
+            (<c>M_Pf_Dt_*</c>), pro vzhled (<c>M_Pf_*</c>), obecné vlastnosti elementu
+            (<c>M_Pf_Element.*</c>) a napojení událostí (<c>M_Pf_Connection.*</c>).
+            </summary>
+        </member>
+        <member name="T:TpiGto.Model.GtoValueKind">
+            <summary>
+            Datový charakter hodnoty vlastnosti GTO (in_new_value). Určuje, jak se hodnota
+            validuje a jak se zapisuje do generovaného skriptu.
+            </summary>
+        </member>
+        <member name="F:TpiGto.Model.GtoValueKind.Text">
+            <summary>Libovolný text. Do skriptu se zapíše v apostrofech.</summary>
+        </member>
+        <member name="F:TpiGto.Model.GtoValueKind.Bool01">
+            <summary>Hodnota 0/1.</summary>
+        </member>
+        <member name="F:TpiGto.Model.GtoValueKind.Number">
+            <summary>Číslo (index, šířka, pořadí, margin…).</summary>
+        </member>
+        <member name="F:TpiGto.Model.GtoValueKind.Css">
+            <summary>CSS styl, např. 'background-color: #0062cc;border-color: #005cbf;'.</summary>
+        </member>
+        <member name="F:TpiGto.Model.GtoValueKind.Color">
+            <summary>Barva – CSS zápis barvy (#RRGGBB, rgb(), název).</summary>
+        </member>
+        <member name="F:TpiGto.Model.GtoValueKind.MwfName">
+            <summary>Název MWF, který se má spustit.</summary>
+        </member>
+        <member name="F:TpiGto.Model.GtoValueKind.ElementName">
+            <summary>Název jiného elementu (např. cílový element pro vnoření).</summary>
+        </member>
+        <member name="F:TpiGto.Model.GtoValueKind.Sql">
+            <summary>
+            SQL výraz / SELECT. Typicky jen u dynamického GTO – do makra se vkládá bez apostrofů.
+            </summary>
+        </member>
+        <member name="T:TpiGto.Model.IElementDescriptor">
+            <summary>
+            Minimální popis prvku stránky, se kterým knihovna pracuje. Knihovna je díky tomu
+            nezávislá na WebView2 i na WinForms – hostitelská aplikace jen implementuje tento
+            interface nad svou reprezentací DOM uzlu.
+            </summary>
+        </member>
+        <member name="P:TpiGto.Model.IElementDescriptor.Tag">
+            <summary>Název tagu malými písmeny, např. <c>input</c>.</summary>
+        </member>
+        <member name="P:TpiGto.Model.IElementDescriptor.Id">
+            <summary>Atribut id (může být prázdný).</summary>
+        </member>
+        <member name="P:TpiGto.Model.IElementDescriptor.Name">
+            <summary>Atribut name (může být prázdný).</summary>
+        </member>
+        <member name="P:TpiGto.Model.IElementDescriptor.InputType">
+            <summary>U &lt;input&gt; hodnota atributu type.</summary>
+        </member>
+        <member name="P:TpiGto.Model.IElementDescriptor.Role">
+            <summary>Hodnota atributu role.</summary>
+        </member>
+        <member name="P:TpiGto.Model.IElementDescriptor.Classes">
+            <summary>Seznam CSS tříd.</summary>
+        </member>
+        <member name="P:TpiGto.Model.IElementDescriptor.Attributes">
+            <summary>Všechny atributy prvku.</summary>
+        </member>
+        <member name="P:TpiGto.Model.IElementDescriptor.Text">
+            <summary>Textový obsah (zkrácený).</summary>
+        </member>
+        <member name="P:TpiGto.Model.IElementDescriptor.Parent">
+            <summary>Rodič prvku, nebo null u kořene.</summary>
+        </member>
+        <member name="T:TpiGto.Model.TpiElementType">
+            <summary>
+            Základní třída typu prvku TPI.
+            <para>
+            <b>Přidání nového typu:</b> vytvoř novou třídu v namespace <c>TpiGto.Types</c>, která dědí
+            z této třídy, přepiš <see cref="P:TpiGto.Model.TpiElementType.Code"/>, <see cref="P:TpiGto.Model.TpiElementType.Name"/> a <see cref="M:TpiGto.Model.TpiElementType.DefineProperties"/>.
+            Registr typů si ji najde sám (reflexí), nic dalšího registrovat netřeba.
+            Alternativa bez rekompilace: doplnit typ do souboru <c>elementTypes.custom.json</c>.
+            </para>
+            </summary>
+        </member>
+        <member name="P:TpiGto.Model.TpiElementType.Code">
+            <summary>Interní kód typu, např. <c>LINEEDIT</c>. Musí být unikátní.</summary>
+        </member>
+        <member name="P:TpiGto.Model.TpiElementType.Name">
+            <summary>Název zobrazený uživateli.</summary>
+        </member>
+        <member name="P:TpiGto.Model.TpiElementType.Description">
+            <summary>Popis typu (k čemu ve frameworku TPI slouží).</summary>
+        </member>
+        <member name="P:TpiGto.Model.TpiElementType.PathHint">
+            <summary>Nápověda k tvaru in_ref_element_path pro tento typ.</summary>
+        </member>
+        <member name="P:TpiGto.Model.TpiElementType.ListScreenElementName">
+            <summary>
+            Název elementu, který tento typ má na obrazovce typu seznam – např. tabulka
+            seznamu se ve frameworku vždy jmenuje <c>object_list</c>. Aplikace ho použije
+            jako návrh in_ref_element_path. Null = odvozuje se z prvku stránky.
+            </summary>
+        </member>
+        <member name="P:TpiGto.Model.TpiElementType.RequiresColumn">
+            <summary>
+            True, pokud element_path musí obsahovat i sloupec (fyzický název sloupce
+            v databázi) – bez něj by se změna vztahovala na celou tabulku.
+            </summary>
+        </member>
+        <member name="P:TpiGto.Model.TpiElementType.AppendsEvent">
+            <summary>
+            True, pokud se za element_path doplňuje event (typ CONNECTION),
+            tedy <c>&lt;element&gt;.&lt;event&gt;</c>.
+            </summary>
+        </member>
+        <member name="P:TpiGto.Model.TpiElementType.IncludesCommonProperties">
+            <summary>
+            True, pokud se k typu přidávají i společné vlastnosti M_Pf_Element.* .
+            </summary>
+        </member>
+        <member name="P:TpiGto.Model.TpiElementType.MatchRule">
+            <summary>Pravidlo pro automatické nabídnutí typu podle kliknutého prvku.</summary>
+        </member>
+        <member name="P:TpiGto.Model.TpiElementType.SortOrder">
+            <summary>Pořadí v nabídce (nižší = výše).</summary>
+        </member>
+        <member name="P:TpiGto.Model.TpiElementType.Origin">
+            <summary>Odkud definice pochází – pro uživatele (BUILT-IN / název JSON souboru).</summary>
+        </member>
+        <member name="P:TpiGto.Model.TpiElementType.Properties">
+            <summary>Vlastnosti specifické pro tento typ (bez společných M_Pf_Element.*).</summary>
+        </member>
+        <member name="M:TpiGto.Model.TpiElementType.DefineProperties">
+            <summary>Definice vlastností typu – jediné, co musí potomek doplnit.</summary>
+        </member>
+        <member name="T:TpiGto.Model.TpiEvent">
+            <summary>
+            Událost, na kterou lze přes M_Pf_Connection napojit MWF.
+            element_path se pak zapisuje ve tvaru <c>&lt;element&gt;.&lt;event&gt;</c>,
+            např. <c>ContainerL_PTS_VRSTVA_DAT_FILTR_PTS_CIS_TYP_DAT_KOD_Field.blur</c>.
+            </summary>
+        </member>
+        <member name="P:TpiGto.Model.TpiEvent.ConnectionProperty">
+            <summary>M_Pf_Connection.Supported nebo M_Pf_Connection.Enabled.</summary>
+        </member>
+        <member name="T:TpiGto.Model.TpiEvents">
+            <summary>Události podporované frameworkem TPI (cis_gto.docx, makra.docx).</summary>
+        </member>
+        <member name="T:TpiGto.Model.TpiScreenKind">
+            <summary>
+            Typ obrazovky TPI. Aplikace má dva základní druhy obrazovek a podle nich se liší
+            skladba <c>in_ref_element_path</c>.
+            </summary>
+        </member>
+        <member name="F:TpiGto.Model.TpiScreenKind.Unknown">
+            <summary>Neurčeno.</summary>
+        </member>
+        <member name="F:TpiGto.Model.TpiScreenKind.List">
+            <summary>
+            Seznam – obraz celé databázové tabulky. Element celé tabulky se ve frameworku
+            jmenuje vždy <c>object_list</c>; sloupec se adresuje jako
+            <c>object_list.&lt;FYZICKÝ_NÁZEV_SLOUPCE&gt;</c>.
+            </summary>
+        </member>
+        <member name="F:TpiGto.Model.TpiScreenKind.Detail">
+            <summary>Detail – formulářová obrazovka nad jedním řádkem tabulky.</summary>
+        </member>
+        <member name="T:TpiGto.Naming.TpiNaming">
+            <summary>
+            Konvence názvů TPI odvozené ze školení:
+            fyzický název tabulky je v názvu page flow vždy všechno za prefixem <c>LIST</c>,
+            a podle prefixu se pozná i typ obrazovky.
+            </summary>
+        </member>
+        <member name="M:TpiGto.Naming.TpiNaming.TableNameFromPageFlow(System.String)">
+            <summary>
+            Fyzický název tabulky v databázi odvozený z názvu page flow –
+            <c>LIST_PZSV_DOPRAVNI_URCENI</c> → <c>PZSV_DOPRAVNI_URCENI</c>.
+            Vrací null, když název page flow prefix LIST nemá.
+            </summary>
+        </member>
+        <member name="M:TpiGto.Naming.TpiNaming.ScreenKindFromPageFlow(System.String)">
+            <summary>Typ obrazovky odhadnutý z názvu page flow.</summary>
+        </member>
+        <member name="M:TpiGto.Naming.TpiNaming.LooksLikePageFlow(System.String)">
+            <summary>
+            Vypadá text jako název page flow? (prefix + podtržítko + velká písmena).
+            Používá se při hledání názvu page flow v síťové komunikaci.
+            </summary>
+        </member>
+        <member name="T:TpiGto.Paths.ElementPathOptions">
+            <summary>
+            Nastavení odvozování <c>in_ref_element_path</c> z prvku stránky.
+            <para>
+            Ve frameworku TPI je element_path název elementu (např.
+            <c>ContainerL_PTS_VRSTVA_DAT_FILTR_PTS_CIS_TYP_DAT_KOD_Field</c>), ne CSS selektor.
+            Který atribut vygenerované stránky tento název nese, se nastavuje zde – v aplikaci
+            stačí u kliknutého prvku označit správný atribut a uloží se sem.
+            </para>
+            </summary>
+        </member>
+        <member name="P:TpiGto.Paths.ElementPathOptions.SourceAttributes">
+            <summary>
+            Atributy prohledávané v tomto pořadí. První nalezený vyhrává.
+            <para>
+            Podle školení nese název elementu atribut <c>name</c> – <c>id</c> je generované
+            stránkou, a proto se pro GTO nepoužívá (zůstává až na konci jako záloha).
+            </para>
+            </summary>
+        </member>
+        <member name="P:TpiGto.Paths.ElementPathOptions.SearchAncestors">
+            <summary>Hledat zdrojový atribut i u rodičů, pokud ho prvek sám nemá.</summary>
+        </member>
+        <member name="P:TpiGto.Paths.ElementPathOptions.MaxAncestorDepth">
+            <summary>Maximální počet úrovní rodičů při hledání.</summary>
+        </member>
+        <member name="P:TpiGto.Paths.ElementPathOptions.TrimPrefixes">
+            <summary>Předpony odstraněné z nalezené hodnoty (např. framework přidává "pf_").</summary>
+        </member>
+        <member name="P:TpiGto.Paths.ElementPathOptions.TrimSuffixes">
+            <summary>Přípony odstraněné z nalezené hodnoty (např. "_input", "_wrap").</summary>
+        </member>
+        <member name="P:TpiGto.Paths.ElementPathOptions.ExtractRegex">
+            <summary>
+            Regulární výraz s pojmenovanou skupinou <c>path</c>. Je-li vyplněn, použije se
+            na hodnotu atributu a výsledkem je obsah skupiny.
+            Např. <c>^ctl00_(?&lt;path&gt;.+)$</c>.
+            </summary>
+        </member>
+        <member name="P:TpiGto.Paths.ElementPathOptions.Separator">
+            <summary>Oddělovač mezi elementem a sloupcem / eventem.</summary>
+        </member>
+        <member name="T:TpiGto.Paths.ElementPathCandidate">
+            <summary>Kandidát na element_path nalezený u prvku nebo jeho rodiče.</summary>
+        </member>
+        <member name="P:TpiGto.Paths.ElementPathCandidate.Attribute">
+            <summary>Název atributu, ze kterého hodnota pochází.</summary>
+        </member>
+        <member name="P:TpiGto.Paths.ElementPathCandidate.RawValue">
+            <summary>Původní hodnota atributu.</summary>
+        </member>
+        <member name="P:TpiGto.Paths.ElementPathCandidate.Value">
+            <summary>Hodnota po ořezání předpon/přípon a aplikaci regexu.</summary>
+        </member>
+        <member name="P:TpiGto.Paths.ElementPathCandidate.Depth">
+            <summary>0 = přímo kliknutý prvek, 1 = rodič, 2 = prarodič…</summary>
+        </member>
+        <member name="T:TpiGto.Paths.ElementPathResolver">
+            <summary>
+            Odvozuje <c>in_ref_element_path</c> z prvku stránky podle <see cref="T:TpiGto.Paths.ElementPathOptions"/>.
+            </summary>
+        </member>
+        <member name="M:TpiGto.Paths.ElementPathResolver.Resolve(TpiGto.Model.IElementDescriptor)">
+            <summary>Nejlepší návrh, nebo null když se nic nenašlo.</summary>
+        </member>
+        <member name="M:TpiGto.Paths.ElementPathResolver.GetCandidates(TpiGto.Model.IElementDescriptor)">
+            <summary>
+            Všichni kandidáti – nejdřív podle pořadí atributů v nastavení, pak ostatní
+            atributy prvku (ty se v aplikaci nabízejí k označení jako zdroj element_path).
+            </summary>
+        </member>
+        <member name="M:TpiGto.Paths.ElementPathResolver.Compose(System.String,System.String)">
+            <summary>Složí výsledný element_path z názvu elementu a přípony (sloupec nebo event).</summary>
+        </member>
+        <member name="T:TpiGto.Registry.BuiltInElementTypeProvider">
+            <summary>
+            Najde reflexí všechny neabstraktní potomky <see cref="T:TpiGto.Model.TpiElementType"/>
+            s bezparametrickým konstruktorem. Nový typ prvku tedy stačí přidat jako novou
+            třídu – nikde se neregistruje ručně.
+            </summary>
+        </member>
+        <member name="M:TpiGto.Registry.BuiltInElementTypeProvider.#ctor(System.Reflection.Assembly)">
+            <summary>Umožňuje načíst typy i z jiné assembly (vlastní rozšíření).</summary>
+        </member>
+        <member name="T:TpiGto.Registry.ITpiElementTypeProvider">
+            <summary>
+            Zdroj typů prvků. Registr skládá číselník ze všech zaregistrovaných zdrojů,
+            takže typy lze dodávat kódem (třída v Types), JSON souborem i vlastním pluginem.
+            </summary>
+        </member>
+        <member name="P:TpiGto.Registry.ITpiElementTypeProvider.Origin">
+            <summary>Popis zdroje pro uživatele (zobrazuje se u typu).</summary>
+        </member>
+        <member name="T:TpiGto.Registry.JsonElementTypeProvider">
+            <summary>
+            Načte typy prvků z JSON souboru. Slouží k rozšíření číselníku bez rekompilace
+            (nový typ, nová vlastnost, nebo přepsání vestavěného typu stejným kódem).
+            </summary>
+        </member>
+        <member name="P:TpiGto.Registry.JsonElementTypeProvider.JsonType.ListScreenElementName">
+            <summary>Např. object_list pro tabulku na obrazovce typu seznam.</summary>
+        </member>
+        <member name="P:TpiGto.Registry.JsonElementTypeProvider.JsonType.RequiresColumn">
+            <summary>Vyžaduje sloupec v element_path.</summary>
+        </member>
+        <member name="P:TpiGto.Registry.JsonElementTypeProvider.JsonProperty.ValueKind">
+            <summary>Text | Bool01 | Number | Css | Color | MwfName | ElementName | Sql</summary>
+        </member>
+        <member name="T:TpiGto.Registry.JsonDefinedElementType">
+            <summary>Typ prvku definovaný v JSON souboru.</summary>
+        </member>
+        <member name="T:TpiGto.Registry.TpiTypeRegistry">
+            <summary>
+            Číselník typů prvků TPI. Skládá se ze zdrojů (<see cref="T:TpiGto.Registry.ITpiElementTypeProvider"/>);
+            typ ze zdroje zaregistrovaného později přepíše dřívější typ se stejným kódem,
+            takže JSON soubor umí předefinovat vestavěný typ.
+            </summary>
+        </member>
+        <member name="M:TpiGto.Registry.TpiTypeRegistry.CreateDefault">
+            <summary>Registr jen s vestavěnými typy.</summary>
+        </member>
+        <member name="M:TpiGto.Registry.TpiTypeRegistry.CreateDefault(System.String)">
+            <summary>Registr s vestavěnými typy a volitelným JSON rozšířením.</summary>
+        </member>
+        <member name="P:TpiGto.Registry.TpiTypeRegistry.CommonProperties">
+            <summary>Společné vlastnosti M_Pf_Element.* přidávané k typům.</summary>
+        </member>
+        <member name="M:TpiGto.Registry.TpiTypeRegistry.Reload">
+            <summary>Znovu načte typy ze všech zdrojů (např. po ruční úpravě JSON souboru).</summary>
+        </member>
+        <member name="P:TpiGto.Registry.TpiTypeRegistry.Types">
+            <summary>Všechny typy seřazené pro nabídku.</summary>
+        </member>
+        <member name="M:TpiGto.Registry.TpiTypeRegistry.GetProperties(TpiGto.Model.TpiElementType)">
+            <summary>
+            Vlastnosti nabízené pro daný typ – vlastní vlastnosti typu plus společné M_Pf_Element.*.
+            </summary>
+        </member>
+        <member name="T:TpiGto.Scripting.DynamicGtoScriptWriter">
+            <summary>
+            Dynamické GTO podle dynamicke_GTO.docx – makro @GATTRIB_OVERLOAD, které se vkládá
+            do theSql plain bloku MWF. Volitelně obalí makra kostrou MWF podle frameworkTPI.docx.
+            </summary>
+        </member>
+        <member name="T:TpiGto.Scripting.GtoValidationIssue">
+            <summary>Výsledek kontroly mapování před generováním.</summary>
+        </member>
+        <member name="M:TpiGto.Scripting.GtoValidationIssue.#ctor(System.String,System.String,System.String)">
+            <summary>Výsledek kontroly mapování před generováním.</summary>
+        </member>
+        <member name="T:TpiGto.Scripting.GtoScriptGenerator">
+            <summary>
+            Generátor skriptů GTO nad namapovanými prvky. Formáty výstupu dodávají
+            zapisovače <see cref="T:TpiGto.Scripting.IGtoScriptWriter"/>, takže lze přidat další režim
+            bez zásahu do generátoru.
+            </summary>
+        </member>
+        <member name="M:TpiGto.Scripting.GtoScriptGenerator.Generate(TpiGto.Mapping.ElementMappingDocument,TpiGto.Mapping.GtoMode)">
+            <summary>Vygeneruje skript pro daný režim. Vrátí prázdný řetězec, pokud není co generovat.</summary>
+        </member>
+        <member name="M:TpiGto.Scripting.GtoScriptGenerator.GenerateAll(TpiGto.Mapping.ElementMappingDocument)">
+            <summary>Statické i dynamické GTO v jednom výstupu (oddělené komentářem).</summary>
+        </member>
+        <member name="M:TpiGto.Scripting.GtoScriptGenerator.Validate(TpiGto.Mapping.ElementMappingDocument)">
+            <summary>Kontrola mapování – prázdné cesty, neznámé vlastnosti, chybějící hodnoty.</summary>
+        </member>
+        <member name="T:TpiGto.Scripting.GtoScriptOptions">
+            <summary>Nastavení generovaných skriptů (hlavička podle staticke_GTO.docx / frameworkTPI.docx).</summary>
+        </member>
+        <member name="P:TpiGto.Scripting.GtoScriptOptions.User">
+            <summary>in_user v SRV.GENDEF_OBJ.INIT_MD_EDIT.</summary>
+        </member>
+        <member name="P:TpiGto.Scripting.GtoScriptOptions.Termin">
+            <summary>in_termin v SRV.GENDEF_OBJ.INIT_MD_EDIT.</summary>
+        </member>
+        <member name="P:TpiGto.Scripting.GtoScriptOptions.OverloadType">
+            <summary>in_gattrib_overload_typ – podle dokumentace vždy DEFAULT_OVERLOAD.</summary>
+        </member>
+        <member name="P:TpiGto.Scripting.GtoScriptOptions.IncludeScriptBody">
+            <summary>Obalit bloky celým tělem skriptu (DECLARE … END;).</summary>
+        </member>
+        <member name="P:TpiGto.Scripting.GtoScriptOptions.AddOutputReminder">
+            <summary>
+            Vložit do hlavičky skriptu připomínku zapnout DBMS Output. Bez něj není vidět,
+            že skript skončil OK – nepovolená hodnota projde bez povšimnutí.
+            </summary>
+        </member>
+        <member name="P:TpiGto.Scripting.GtoScriptOptions.WrapDynamicInMwf">
+            <summary>U dynamického GTO obalit makra kostrou MWF podle frameworkTPI.docx.</summary>
+        </member>
+        <member name="P:TpiGto.Scripting.GtoScriptOptions.Indent">
+            <summary>Odsazení bloků v těle skriptu.</summary>
+        </member>
+        <member name="P:TpiGto.Scripting.GtoScriptOptions.AppendCacheReset">
+            <summary>
+            Přidat na konec statického skriptu reset cache page flow. Bez něj se změna
+            nemusí na obrazovce projevit – page flow si drží cache zobrazení atributů.
+            Cenou je pomalejší první načtení obrazovky.
+            </summary>
+        </member>
+        <member name="P:TpiGto.Scripting.GtoScriptOptions.CacheResetStatement">
+            <summary>
+            Volání procedury pro reset cache page flow. Doplň podle prostředí, např.
+            <c>SRV.NEJAKY_PACKAGE.RESET_PAGE_FLOW('{PF}');</c> – zástupný text
+            <c>{PF}</c> se nahradí názvem page flow. Prázdné = do skriptu se vloží
+            jen připomínka v komentáři.
+            </summary>
+        </member>
+        <member name="T:TpiGto.Scripting.GtoValueFormatter">
+            <summary>Zápis hodnoty do PL/SQL – uvozování a rozpoznání SQL výrazu.</summary>
+        </member>
+        <member name="M:TpiGto.Scripting.GtoValueFormatter.EscapeLiteral(System.String)">
+            <summary>Zdvojí apostrofy v textové hodnotě.</summary>
+        </member>
+        <member name="M:TpiGto.Scripting.GtoValueFormatter.Quote(System.String)">
+            <summary>Hodnota v apostrofech – pro in_new_value statického GTO.</summary>
+        </member>
+        <member name="M:TpiGto.Scripting.GtoValueFormatter.IsSqlExpression(System.String,TpiGto.Model.GtoValueKind)">
+            <summary>
+            True, pokud se hodnota má do makra vložit bez apostrofů – tedy jde o SELECT,
+            výraz v závorce, nebo jiné makro frameworku (@…).
+            </summary>
+        </member>
+        <member name="M:TpiGto.Scripting.GtoValueFormatter.ForMacro(System.String,TpiGto.Model.GtoValueKind)">
+            <summary>Hodnota pro 3. parametr makra @GATTRIB_OVERLOAD.</summary>
+        </member>
+        <member name="T:TpiGto.Scripting.GtoBlockContext">
+            <summary>Kontext jednoho generovaného bloku GTO.</summary>
+        </member>
+        <member name="T:TpiGto.Scripting.IGtoScriptWriter">
+            <summary>
+            Zapisovač skriptu pro jeden režim GTO. Nový výstupní formát = nová implementace
+            tohoto interface; generátor je vybírá podle <see cref="T:TpiGto.Mapping.GtoMode"/>.
+            </summary>
+        </member>
+        <member name="M:TpiGto.Scripting.IGtoScriptWriter.WriteBlock(System.Text.StringBuilder,TpiGto.Scripting.GtoBlockContext)">
+            <summary>Zapíše jeden blok (jednu vlastnost).</summary>
+        </member>
+        <member name="M:TpiGto.Scripting.IGtoScriptWriter.Wrap(System.String,TpiGto.Scripting.GtoScriptOptions,System.String)">
+            <summary>Obalí bloky hlavičkou a patičkou skriptu.</summary>
+            <param name="blocks">Vygenerované bloky.</param>
+            <param name="options">Nastavení skriptu.</param>
+            <param name="pfName">Název page flow – potřebný např. pro reset cache.</param>
+        </member>
+        <member name="T:TpiGto.Scripting.StaticGtoScriptWriter">
+            <summary>
+            Statické GTO podle staticke_GTO.docx – samostatný skript s bloky
+            SRV.GENDEF_OBJ.CREATE_GATTRIB_OVERLOAD.
+            </summary>
+        </member>
+        <member name="T:TpiGto.Types.AssignerElementType">
+            <summary>Element typu assigner (přiřazovací prvek). Podporuje event right_click.</summary>
+        </member>
+        <member name="T:TpiGto.Types.ButtonElementType">
+            <summary>Tlačítko na obrazovce.</summary>
+        </member>
+        <member name="T:TpiGto.Types.ComboboxColumnElementType">
+            <summary>Sloupec zobrazený v comboboxu.</summary>
+        </member>
+        <member name="T:TpiGto.Types.ComboboxElementType">
+            <summary>Rozbalovací seznam.</summary>
+        </member>
+        <member name="T:TpiGto.Types.ConnectionElementType">
+            <summary>Připnutí MWF na akci uživatele. Do element_path se doplňuje event.</summary>
+        </member>
+        <member name="T:TpiGto.Types.GenericElementType">
+            <summary>Element bez specifického typu – jen společné vlastnosti M_Pf_Element.*.</summary>
+        </member>
+        <member name="T:TpiGto.Types.LabelElementType">
+            <summary>Textový popisek.</summary>
+        </member>
+        <member name="T:TpiGto.Types.LayoutElementType">
+            <summary>Kontejner / rozvržení části obrazovky.</summary>
+        </member>
+        <member name="T:TpiGto.Types.LineeditElementType">
+            <summary>Jednořádkové vstupní pole, ve frameworku typicky ..._Field.</summary>
+        </member>
+        <member name="T:TpiGto.Types.LineeditLongElementType">
+            <summary>Víceřádkové textové pole.</summary>
+        </member>
+        <member name="T:TpiGto.Types.MenuItemElementType">
+            <summary>Položka menu, např. MainMenu.PZSV_MWF_POSUN_TERMINU_ETAPY.</summary>
+        </member>
+        <member name="T:TpiGto.Types.TabElementType">
+            <summary>Hlavní element se záložkami, např. RelTabs.</summary>
+        </member>
+        <member name="T:TpiGto.Types.TabItemElementType">
+            <summary>Jedna záložka uvnitř záložkového kontejneru.</summary>
+        </member>
+        <member name="T:TpiGto.Types.TableColumnElementType">
+            <summary>Sloupec tabulky.</summary>
+        </member>
+        <member name="P:TpiGto.Types.TableColumnElementType.ListScreenElementName">
+            <summary>Na obrazovce typu seznam je tabulkou object_list.</summary>
+        </member>
+        <member name="P:TpiGto.Types.TableColumnElementType.RequiresColumn">
+            <summary>Bez sloupce by se změna vztahovala na celou tabulku.</summary>
+        </member>
+        <member name="T:TpiGto.Types.TableElementType">
+            <summary>Datová tabulka na obrazovce, např. child_PZSV_KOL_LOZE.</summary>
+        </member>
+        <member name="P:TpiGto.Types.TableElementType.ListScreenElementName">
+            <summary>Na obrazovce typu seznam se tabulka ve frameworku jmenuje vždy object_list.</summary>
+        </member>
+        <member name="T:TpiGto.Types.TableValueElementType">
+            <summary>Konkrétní hodnota / buňka tabulky.</summary>
+        </member>
+        <member name="T:TpiGto.Types.WindowElementType">
+            <summary>Celá obrazovka / PageFlow okno.</summary>
+        </member>
+    </members>
+</doc>

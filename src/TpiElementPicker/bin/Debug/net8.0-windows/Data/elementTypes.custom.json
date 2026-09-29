@@ -1,0 +1,33 @@
+{
+  // Rozšíření číselníku typů prvků BEZ rekompilace.
+  // Soubor se načítá z adresáře s .exe (Data\elementTypes.custom.json).
+  // Typ se stejným "code" jako vestavěný typ ho přepíše.
+  //
+  // valueKind: Text | Bool01 | Number | Css | Color | MwfName | ElementName | Sql
+  //
+  // Trvalé rozšíření je lepší přidat jako třídu do knihovny TpiGto (složka Types) –
+  // viz README. Tenhle soubor je na rychlé doplnění za běhu.
+
+  "version": 1,
+  "types": [
+    {
+      "code": "TREE",
+      "name": "Strom (Tree)",
+      "description": "Stromový element – v makrech je uveden mezi prvky s eventem rightClick.",
+      "sortOrder": 75,
+      "includesCommonProperties": true,
+      "match": {
+        "roles": [ "tree" ],
+        "classHints": [ "tree", "treeview" ]
+      },
+      "properties": [
+        {
+          "name": "M_Pf_Element.Visible",
+          "description": "Zobrazení elementu 0/1",
+          "valueKind": "Bool01",
+          "example": "1"
+        }
+      ]
+    }
+  ]
+}

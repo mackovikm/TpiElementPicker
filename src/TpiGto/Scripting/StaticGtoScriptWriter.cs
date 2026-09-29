@@ -1,0 +1,101 @@
+using System.Text;
+using TpiGto.Mapping;
+
+namespace TpiGto.Scripting;
+
+/// <summary>
+/// Statické GTO podle staticke_GTO.docx – samostatný skript s bloky
+/// SRV.GENDEF_OBJ.CREATE_GATTRIB_OVERLOAD.
+/// </summary>
+public sealed class StaticGtoScriptWriter : IGtoScriptWriter
+{
+    public GtoMode Mode => GtoMode.Static;
+
+    public void WriteBlock(StringBuilder sb, GtoBlockContext ctx)
+    {
+        var o = ctx.Options;
+        var i = o.Indent;
+        var a = ctx.Assignment;
+
+        if (!string.IsNullOrWhiteSpace(a.Note))
+            sb.AppendLine($"{i}-- {a.Note}");
+
+        sb.AppendLine($"{i}SRV.GENDEF_OBJ.CREATE_GATTRIB_OVERLOAD (");
+        sb.AppendLine($"{i} in_pf_name               => {GtoValueFormatter.Quote(ctx.PfName)}");
+        sb.AppendLine($"{i},in_ref_element_path      => {GtoValueFormatter.Quote(ctx.ElementPath)}");
+        sb.AppendLine($"{i},in_gattrib_overload_name => {GtoValueFormatter.Quote(a.PropertyName)}");
+        sb.AppendLine($"{i},in_gattrib_overload_typ  => {GtoValueFormatter.Quote(o.OverloadType)}");
+        sb.AppendLine($"{i},in_new_value             => {GtoValueFormatter.Quote(a.Value)}");
+        sb.AppendLine($"{i},in_poradi                => {(a.Order <= 0 ? 1 : a.Order)}");
+        sb.AppendLine($"{i},in_ref_login             => NULL");
+        sb.AppendLine($"{i},in_ref_role              => NULL");
+        sb.AppendLine($"{i},in_element_typ           => NULL");
+        sb.AppendLine($"{i},in_zruseno               => {(a.Cancelled == 1 ? 1 : 0)}");
+        sb.AppendLine($"{i});");
+        sb.AppendLine();
+    }
+
+    public string Wrap(string blocks, GtoScriptOptions o, string pfName)
+    {
+        if (!o.IncludeScriptBody)
+            return blocks.TrimEnd() + Environment.NewLine;
+
+        var sb = new StringBuilder();
+
+        if (o.AddOutputReminder)
+        {
+            sb.AppendLine("-- Před spuštěním zapni v developeru DBMS Output pro tuto databázi –");
+            sb.AppendLine("-- jinak nepoznáš, že skript skončil OK (nepovolená hodnota projde bez chyby).");
+            sb.AppendLine();
+        }
+
+        sb.AppendLine("DECLARE");
+        sb.AppendLine("  l_krok_id            NUMBER;");
+        sb.AppendLine("  l_msg_id_out         NUMBER;");
+        sb.AppendLine("  l_info               VARCHAR2(256);");
+        sb.AppendLine("  l_aplikacia          NUMBER;");
+        sb.AppendLine("  l_m_tabulka          srv.gendef_obj.t_m_tabulka;");
+        sb.AppendLine("  l_m_sloupec          srv.gendef_obj.t_m_sloupec;");
+        sb.AppendLine("  l_m_cis_dom_dat_typ  srv.gendef_obj.t_m_cis_dom_dat_typ;");
+        sb.AppendLine("  l_index              NUMBER;");
+        sb.AppendLine("BEGIN");
+        sb.AppendLine("  --");
+        sb.AppendLine("  SRV.GENDEF_OBJ.INIT_MD_EDIT (");
+        sb.AppendLine($"    in_user      => {GtoValueFormatter.Quote(o.User)}");
+        sb.AppendLine($"   ,in_termin    => {o.Termin}");
+        sb.AppendLine("  );");
+        sb.AppendLine("  --");
+        sb.AppendLine();
+        sb.Append(blocks.TrimEnd());
+        sb.AppendLine();
+        sb.AppendLine();
+
+        if (o.AppendCacheReset)
+        {
+            sb.AppendLine("  -- Reset cache page flow – bez něj se změna na obrazovce nemusí projevit.");
+            if (string.IsNullOrWhiteSpace(o.CacheResetStatement))
+            {
+                sb.AppendLine("  -- TODO: doplň volání procedury pro reset cache page flow");
+                sb.AppendLine("  --       (Nastavení → Skript → CacheResetStatement).");
+            }
+            else
+            {
+                var statement = o.CacheResetStatement
+                    .Replace("{PF}", pfName ?? string.Empty, StringComparison.Ordinal)
+                    .TrimEnd();
+
+                foreach (var line in statement.Replace("\r\n", "\n").Split('\n'))
+                    sb.AppendLine("  " + line);
+            }
+
+            sb.AppendLine();
+        }
+
+        sb.AppendLine("  --");
+        sb.AppendLine("  SRV.GENDEF_OBJ.WAIT4MSG;");
+        sb.AppendLine("  --");
+        sb.AppendLine("END;");
+        sb.AppendLine("/");
+        return sb.ToString();
+    }
+}
