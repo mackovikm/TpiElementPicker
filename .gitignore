@@ -1,1 +1,5 @@
 .vs/
+src/TpiGto/obj/
+src/TpiGto/bin/
+src/TpiElementPicker/obj/
+src/TpiElementPicker/bin/

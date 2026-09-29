@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("TpiGto")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+564a57a42e71f7a906089ab6769ea0c8580a429e")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b5235027aa8a6882489a1079c716ea78bff037aa")]
 [assembly: System.Reflection.AssemblyProductAttribute("TpiGto")]
 [assembly: System.Reflection.AssemblyTitleAttribute("TpiGto")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
